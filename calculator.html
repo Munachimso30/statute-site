@@ -209,8 +209,65 @@
       margin-top: 8px;
       display: none;
     }
+
+    /* EMAIL CERTIFICATE SECTION */
+    .email-section {
+      display: none;
+      margin-top: 20px;
+      border-top: 1px solid rgba(201,168,76,0.15);
+      padding-top: 20px;
+    }
+    .email-section-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(201,168,76,0.6);
+      margin-bottom: 12px;
+    }
+    .email-row {
+      display: flex;
+      gap: 0;
+    }
+    .email-row input {
+      flex: 1;
+      border-right: none;
+      font-size: 14px;
+      padding: 14px 16px;
+    }
+    .btn-email {
+      background: transparent;
+      border: 1px solid #c9a84c;
+      color: #c9a84c;
+      font-family: 'Georgia', serif;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 14px 20px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.3s;
+    }
+    .btn-email:hover { background: rgba(201,168,76,0.1); }
+    .btn-email:disabled { opacity: 0.5; cursor: not-allowed; }
+    .email-success {
+      display: none;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #5cb88a;
+      letter-spacing: 0.08em;
+    }
+    .email-error {
+      display: none;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #e07070;
+      letter-spacing: 0.08em;
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>emailjs.init('2u6gaTcTrulEQQAH5');</script>
 </head>
 <body>
     <nav style="position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid rgba(201,168,76,0.2);background:rgba(10,22,40,0.95);backdrop-filter:blur(12px);">
@@ -369,6 +426,16 @@
       <button class="btn-outline" id="downloadBtn" onclick="downloadCertificate()">
         ↓ Download Certificate of Tax Position
       </button>
+
+      <div class="email-section" id="emailSection">
+        <div class="email-section-label">✉ Email this certificate</div>
+        <div class="email-row">
+          <input type="email" id="recipientEmail" placeholder="Enter email address"/>
+          <button class="btn-email" id="emailBtn" onclick="emailCertificate()">Send →</button>
+        </div>
+        <div class="email-success" id="emailSuccess">✦ &nbsp; Certificate sent. Check your inbox.</div>
+        <div class="email-error" id="emailError">Failed to send. Please try again or download the PDF.</div>
+      </div>
     </div>
   </div>
 
@@ -593,6 +660,7 @@
         warning.style.display = 'none';
       }
       document.getElementById('downloadBtn').style.display = 'block';
+      document.getElementById('emailSection').style.display = 'block';
     }
 
     function downloadCertificate() {
@@ -821,6 +889,68 @@
         saving: savingNum
       });
       localStorage.setItem('statute_certificates', JSON.stringify(existing));
+    }
+
+    function emailCertificate() {
+      const toEmail = document.getElementById('recipientEmail').value.trim();
+      const successEl = document.getElementById('emailSuccess');
+      const errorEl = document.getElementById('emailError');
+      const btn = document.getElementById('emailBtn');
+
+      successEl.style.display = 'none';
+      errorEl.style.display = 'none';
+
+      if (!toEmail || !toEmail.includes('@')) {
+        errorEl.textContent = 'Please enter a valid email address.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      // Gather all transaction data
+      const price = parseFloat(document.getElementById('price').value);
+      const units = parseInt(document.getElementById('units').value) || 1;
+      const buyerName = document.getElementById('buyerName').value || 'Not specified';
+      const lbtt = document.getElementById('lbttAmount').textContent;
+      const ads = document.getElementById('adsAmount').textContent;
+      const total = document.getElementById('totalAmount').textContent;
+      const rateBand = document.getElementById('rateBand').textContent;
+      const section59 = units >= 6;
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      const refNum = 'STA-' + now.getFullYear() + '-' +
+        String(now.getMonth()+1).padStart(2,'0') +
+        String(now.getDate()).padStart(2,'0') + '-' +
+        Math.random().toString(36).substr(2,6).toUpperCase();
+
+      const statutoryNote = section59
+        ? 'Section 59 applied — 6+ dwellings treated as non-residential. ADS not applicable. Authority: LBTT(S)A 2013 s.59'
+        : 'Standard residential rates applied. Authority: LBTT(S)A 2013 s.24';
+
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      emailjs.send('service_ngt1ana', 'template_4qmay6m', {
+        to_email: toEmail,
+        buyer_name: buyerName,
+        ref_number: refNum,
+        date: dateStr,
+        purchase_price: '£' + price.toLocaleString('en-GB'),
+        rate_band: rateBand,
+        lbtt_amount: lbtt,
+        ads_amount: ads,
+        total_tax: total,
+        statutory_note: statutoryNote
+      })
+      .then(() => {
+        successEl.style.display = 'block';
+        btn.textContent = 'Sent ✓';
+      })
+      .catch(() => {
+        errorEl.textContent = 'Failed to send. Please try again or download the PDF.';
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Send →';
+      });
     }
   </script>
 </body>
