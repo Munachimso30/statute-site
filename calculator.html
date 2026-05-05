@@ -708,10 +708,10 @@
       // Right header
       doc.setTextColor(201, 168, 76);
       doc.setFontSize(8);
-      doc.text('CERTIFICATE OF TAX POSITION', 210, 26, { align: 'right' });
+      doc.text('CERTIFICATE OF TAX POSITION', 190, 26, { align: 'right' });
       doc.setTextColor(150, 130, 90);
-      doc.text('Reference: ' + refNum, 210, 32, { align: 'right' });
-      doc.text('Issued: ' + dateStr, 210, 38, { align: 'right' });
+      doc.text('Reference: ' + refNum, 190, 32, { align: 'right' });
+      doc.text('Issued: ' + dateStr, 190, 38, { align: 'right' });
 
       // Divider
       doc.setDrawColor(201, 168, 76);
@@ -808,11 +808,12 @@
       }
 
       const fmt = (n) => '£' + Math.round(n).toLocaleString('en-GB');
-      const VAL_X = 182; // right-align all values here
-      const LBL_X = 28;  // left-align all labels here
+      const LX = 28;   // label x
+      const VX = 182;  // value x (right-aligned)
 
       // TAX CALCULATION BOX
-      const taxH = mdrAppliedPDF ? 96 : 55;
+      // MDR needs extra height for workings; layout calculated to fit A4 (297mm)
+      const taxH = mdrAppliedPDF ? 76 : 55;
       doc.setFillColor(15, 30, 53);
       doc.setDrawColor(201, 168, 76);
       doc.setLineWidth(0.3);
@@ -821,103 +822,85 @@
       doc.setTextColor(201, 168, 76);
       doc.setFontSize(8);
       doc.setFont('helvetica', 'bold');
-      doc.text('TAX CALCULATION', LBL_X, 191);
+      doc.text('TAX CALCULATION', LX, 191);
       doc.setDrawColor(201, 168, 76);
       doc.setLineWidth(0.2);
-      doc.line(LBL_X, 193, VAL_X, 193);
+      doc.line(LX, 193, VX, 193);
 
       if (mdrAppliedPDF && mdrW) {
-        // Workings sub-header
+        // MDR workings subheader
         doc.setTextColor(201, 168, 76);
-        doc.setFontSize(7);
+        doc.setFontSize(6.5);
         doc.setFont('helvetica', 'bold');
-        doc.text('MDR WORKINGS  —  LBTT(S)A 2013 Schedule 5', LBL_X, 200);
+        doc.text('MDR WORKINGS  —  LBTT(S)A 2013 Schedule 5', LX, 199);
 
-        // Two-column workings table
-        const rows = [
-          ['Average price per dwelling  (' + fmt(price) + ' / ' + units + ')', fmt(mdrW.avg)],
-          ['LBTT on ' + fmt(mdrW.avg) + ' per dwelling', fmt(mdrW.lbttOnAvg) + ' each'],
-          ['MDR subtotal  (' + fmt(mdrW.lbttOnAvg) + ' x ' + units + ' dwellings)', fmt(mdrW.mdrRaw)],
+        // 4 workings rows at 6.5pt spacing
+        const workRows = [
+          ['Avg price per dwelling  (' + fmt(price) + ' / ' + units + ' units)', fmt(mdrW.avg)],
+          ['LBTT on ' + fmt(mdrW.avg) + ' x ' + units + ' dwellings  (MDR subtotal)', fmt(mdrW.mdrRaw)],
           ['Standard LBTT on full price  (floor basis)', fmt(mdrW.stdLBTT)],
           ['25% statutory minimum floor', fmt(mdrW.floor)],
         ];
-
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7.5);
-        let ry = 208;
-        rows.forEach((row, i) => {
-          const isFloorRow = i === 4;
-          doc.setTextColor(isFloorRow ? 201 : 150, isFloorRow ? 168 : 130, isFloorRow ? 76 : 90);
-          doc.text(row[0], LBL_X, ry);
-          doc.text(row[1], VAL_X, ry, { align: 'right' });
-          ry += 8;
+        doc.setFontSize(7);
+        let wy = 206;
+        workRows.forEach((row, i) => {
+          const isFloor = i === 3;
+          doc.setTextColor(isFloor ? 201 : 150, isFloor ? 168 : 130, isFloor ? 76 : 90);
+          doc.text(row[0], LX, wy);
+          doc.text(row[1], VX, wy, { align: 'right' });
+          wy += 7;
         });
 
-        // Floor applied badge
+        // Floor applies badge
         if (mdrW.floorApplied) {
           doc.setTextColor(201, 168, 76);
-          doc.setFontSize(6.5);
+          doc.setFontSize(6);
           doc.setFont('helvetica', 'bold');
-          doc.text('[ FLOOR APPLIES — s.Sch.5 para.5(3) ]', LBL_X + 4, ry - 2);
+          doc.text('FLOOR APPLIES — s.Sch.5 para.5(3)', LX + 2, wy);
+          wy += 5;
         }
 
-        // Separator before totals
+        // Separator then totals
         doc.setDrawColor(100, 90, 60);
         doc.setLineWidth(0.2);
-        doc.line(LBL_X, ry + 2, VAL_X, ry + 2);
-        ry += 8;
+        doc.line(LX, wy + 1, VX, wy + 1);
+        wy += 7;
 
-        // LBTT / ADS / Total
-        doc.setTextColor(150, 130, 90);
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.text('LBTT Liability:', LBL_X, ry); 
-        doc.setTextColor(201, 168, 76);
-        doc.text(lbtt, VAL_X, ry, { align: 'right' });
-        ry += 9;
+        doc.setTextColor(150, 130, 90); doc.setFontSize(8.5); doc.setFont('helvetica', 'normal');
+        doc.text('LBTT Liability:', LX, wy);
+        doc.setTextColor(201, 168, 76); doc.text(lbtt, VX, wy, { align: 'right' });
+        wy += 8;
 
         doc.setTextColor(150, 130, 90);
-        doc.text('ADS Liability:', LBL_X, ry);
-        doc.setTextColor(92, 184, 138);
-        doc.text(ads, VAL_X, ry, { align: 'right' });
-        ry += 5;
+        doc.text('ADS Liability:', LX, wy);
+        doc.setTextColor(92, 184, 138); doc.text(ads, VX, wy, { align: 'right' });
+        wy += 5;
 
-        doc.setDrawColor(100, 90, 60);
-        doc.line(LBL_X, ry, VAL_X, ry);
-        ry += 7;
+        doc.setDrawColor(100, 90, 60); doc.line(LX, wy, VX, wy); wy += 7;
 
-        doc.setTextColor(150, 130, 90);
-        doc.setFontSize(9);
-        doc.text('TOTAL TAX LIABILITY:', LBL_X, ry);
-        doc.setTextColor(201, 168, 76);
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.text(total, VAL_X, ry, { align: 'right' });
+        doc.setTextColor(150, 130, 90); doc.setFontSize(8.5);
+        doc.text('TOTAL TAX LIABILITY:', LX, wy);
+        doc.setTextColor(201, 168, 76); doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+        doc.text(total, VX, wy, { align: 'right' });
 
       } else {
-        // Standard layout (non-MDR)
-        doc.setTextColor(150, 130, 90);
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.text('LBTT Liability:', LBL_X, 202);
-        doc.text('ADS Liability:', LBL_X, 212);
-        doc.setDrawColor(100, 90, 60);
-        doc.line(LBL_X, 218, VAL_X, 218);
-        doc.text('TOTAL TAX LIABILITY:', LBL_X, 228);
-        doc.setTextColor(201, 168, 76);
-        doc.setFontSize(9);
-        doc.text(lbtt, VAL_X, 202, { align: 'right' });
-        doc.setTextColor(92, 184, 138);
-        doc.text(ads, VAL_X, 212, { align: 'right' });
-        doc.setTextColor(201, 168, 76);
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.text(total, VAL_X, 228, { align: 'right' });
+        // Standard (non-MDR) layout
+        doc.setTextColor(150, 130, 90); doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+        doc.text('LBTT Liability:', LX, 202);
+        doc.text('ADS Liability:', LX, 212);
+        doc.setDrawColor(100, 90, 60); doc.setLineWidth(0.2); doc.line(LX, 218, VX, 218);
+        doc.text('TOTAL TAX LIABILITY:', LX, 228);
+        doc.setTextColor(201, 168, 76); doc.setFontSize(9); doc.text(lbtt, VX, 202, { align: 'right' });
+        doc.setTextColor(92, 184, 138); doc.text(ads, VX, 212, { align: 'right' });
+        doc.setTextColor(201, 168, 76); doc.setFontSize(12); doc.setFont('helvetica', 'bold');
+        doc.text(total, VX, 228, { align: 'right' });
       }
 
-      // STATUTORY AUTHORITY BOX
-      const statY = 182 + taxH + 5;
-      const statH = mdrAppliedPDF ? 18 : 42;
+      // STATUTORY AUTHORITY BOX — positioned dynamically after tax box
+      const statY = 182 + taxH + 4;
+      const statH = section59 ? 38 : (mdrAppliedPDF ? 20 : 38);
+
       doc.setFillColor(15, 30, 53);
       doc.setDrawColor(60, 50, 20);
       doc.setLineWidth(0.3);
@@ -926,37 +909,37 @@
       doc.rect(20, statY, 3, statH, 'F');
 
       doc.setTextColor(201, 168, 76);
-      doc.setFontSize(8);
+      doc.setFontSize(7.5);
       doc.setFont('helvetica', 'bold');
       doc.text('STATUTORY AUTHORITY', 30, statY + 8);
 
       doc.setTextColor(200, 190, 170);
-      doc.setFontSize(7.5);
+      doc.setFontSize(7);
       doc.setFont('helvetica', 'normal');
       doc.text('Land and Buildings Transaction Tax (Scotland) Act 2013', 30, statY + 15);
 
       if (section59) {
-        doc.text('Section 59 — 6+ dwellings treated as non-residential. ADS not applicable.', 30, statY + 22);
-        doc.text('Revenue Scotland Reference: LBTT(S)A 2013 s.59', 30, statY + 29);
-        doc.text('Rates applied per s.25 LBTT(S)A 2013.', 30, statY + 36);
+        doc.text('Section 59 — Transactions involving 6 or more dwellings', 30, statY + 22);
+        doc.text('Non-residential rates applied. ADS not applicable.', 30, statY + 28);
+        doc.text('Revenue Scotland Reference: LBTT(S)A 2013 s.59', 30, statY + 34);
       } else if (mdrAppliedPDF) {
-        doc.text('Schedule 5 — Multiple Dwellings Relief applied.', 30, statY + 22);
+        doc.text('Schedule 5 — Multiple Dwellings Relief  |  Ref: LBTT(S)A 2013 Sch.5', 30, statY + 15);
       } else {
-        doc.text('Section 24 — Residential property rates and bands applied.', 30, statY + 22);
-        doc.text('Revenue Scotland Reference: LBTT(S)A 2013 s.24', 30, statY + 29);
-        doc.text('Residential rates applied.', 30, statY + 36);
+        doc.text('Section 24 — Residential property rates and bands', 30, statY + 22);
+        doc.text('Residential rates applied.', 30, statY + 28);
+        doc.text('Revenue Scotland Reference: LBTT(S)A 2013 s.24', 30, statY + 34);
       }
 
       // AUDIT FOOTER
-      const auditY = statY + statH + 4;
+      const auditY = statY + statH + 3;
       doc.setFillColor(10, 22, 40);
       doc.setDrawColor(40, 35, 15);
       doc.setLineWidth(0.2);
-      doc.rect(20, auditY, 170, 14, 'FD');
+      doc.rect(20, auditY, 170, 12, 'FD');
       doc.setTextColor(100, 90, 60);
-      doc.setFontSize(7);
-      doc.text('AUDIT RECORD — Generated by Statute on ' + dateStr + ' at ' + timeStr + ' UTC', 105, auditY + 5.5, { align: 'center' });
-      doc.text('Reference: ' + refNum + '  |  statutehq.com', 105, auditY + 11, { align: 'center' });
+      doc.setFontSize(6.5);
+      doc.text('AUDIT RECORD — Generated by Statute on ' + dateStr + ' at ' + timeStr + ' UTC', 105, auditY + 5, { align: 'center' });
+      doc.text('Reference: ' + refNum + '  |  statutehq.com', 105, auditY + 10, { align: 'center' });
 
       // Gold bottom border
       doc.setDrawColor(201, 168, 76);
