@@ -150,6 +150,59 @@
       margin-bottom: 8px;
     }
     .saving-amount { font-size: 32px; color: #5cb88a; }
+    /* TOOLTIP */
+    .tooltip-wrap {
+      position: relative;
+      display: inline-block;
+      margin-left: 8px;
+      cursor: pointer;
+    }
+    .tooltip-icon {
+      width: 16px;
+      height: 16px;
+      background: rgba(201,168,76,0.2);
+      border: 1px solid rgba(201,168,76,0.4);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #c9a84c;
+      font-family: Georgia, serif;
+      font-style: italic;
+      vertical-align: middle;
+    }
+    .tooltip-box {
+      display: none;
+      position: absolute;
+      left: 24px;
+      top: -8px;
+      width: 280px;
+      background: #0f1e35;
+      border: 1px solid rgba(201,168,76,0.3);
+      padding: 14px 16px;
+      font-size: 12px;
+      line-height: 1.7;
+      color: rgba(242,237,228,0.8);
+      z-index: 100;
+    }
+    .tooltip-wrap:hover .tooltip-box { display: block; }
+    .tooltip-box strong { color: #c9a84c; }
+
+    /* WARNING BOX */
+    .warning-box {
+      display: none;
+      margin-top: 16px;
+      background: rgba(224,112,112,0.08);
+      border: 1px solid rgba(224,112,112,0.3);
+      border-left: 3px solid #e07070;
+      padding: 14px 16px;
+      font-size: 12px;
+      color: rgba(242,237,228,0.8);
+      line-height: 1.7;
+    }
+    .warning-box strong { color: #e07070; }
+
     .error {
       color: #e07070;
       font-size: 12px;
@@ -174,7 +227,18 @@
     <div class="tagline">LBTT Compliance Engine · Scotland</div>
 
     <div class="form-group">
-      <label>Number of Units Being Purchased</label>
+      <label>Number of Units Being Purchased
+        <span class="tooltip-wrap">
+          <span class="tooltip-icon">i</span>
+          <div class="tooltip-box">
+            <strong>Why units matter:</strong><br/>
+            6+ units → Section 59 applies (non-residential rates, no ADS)<br/>
+            2-5 units → Multiple Dwelling Relief (MDR) may apply<br/>
+            1 unit → Standard residential rates<br/><br/>
+            <strong>What is MDR?</strong> Multiple Dwelling Relief (LBTT(S)A 2013 Sch.5) calculates tax on the average price per dwelling, which can significantly reduce LBTT for 2-5 unit purchases.
+          </div>
+        </span>
+      </label>
       <input type="number" id="units" placeholder="e.g. 6" min="1"/>
     </div>
 
@@ -203,7 +267,15 @@
     </div>
 
     <div class="form-group">
-      <label>Buyer Name</label>
+      <label>Buyer Name
+        <span class="tooltip-wrap">
+          <span class="tooltip-icon">i</span>
+          <div class="tooltip-box">
+            <strong>Connected Parties Warning</strong><br/>
+            If the buyer name matches or resembles the firm name, Revenue Scotland may treat the parties as connected. This can affect ADS liability and LBTT grouping rules under LBTT(S)A 2013 s.40.
+          </div>
+        </span>
+      </label>
       <input type="text" id="buyerName" placeholder="e.g. Acme Properties Ltd"/>
     </div>
 
@@ -215,6 +287,11 @@
     <div class="form-group">
       <label>Solicitor Name</label>
       <input type="text" id="solicitorName" placeholder="e.g. Michael Smith"/>
+    </div>
+
+    <div class="warning-box" id="connectedWarning">
+      <strong>⚠ Connected Parties Detected</strong><br/>
+      The buyer name appears to match or resemble the acting firm. Revenue Scotland may treat these parties as connected under LBTT(S)A 2013 s.40, which could affect ADS liability and LBTT grouping rules. Please verify this transaction with a qualified tax adviser before proceeding.
     </div>
 
     <div class="error" id="errorMsg">Please fill in all fields correctly.</div>
@@ -429,6 +506,20 @@
       }
 
       document.getElementById('result').style.display = 'block';
+
+      // Connected parties check
+      const buyerNameVal = document.getElementById('buyerName').value.toLowerCase().trim();
+      const firmNameVal = document.getElementById('firmName').value.toLowerCase().trim();
+      const warning = document.getElementById('connectedWarning');
+
+      if (buyerNameVal && firmNameVal && buyerNameVal.length > 2 && firmNameVal.length > 2) {
+        const buyerWords = buyerNameVal.split(' ').filter(w => w.length > 3);
+        const firmWords = firmNameVal.split(' ').filter(w => w.length > 3);
+        const hasMatch = buyerWords.some(word => firmWords.includes(word));
+        warning.style.display = hasMatch ? 'block' : 'none';
+      } else {
+        warning.style.display = 'none';
+      }
       document.getElementById('downloadBtn').style.display = 'block';
     }
 
