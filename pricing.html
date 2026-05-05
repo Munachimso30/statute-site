@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Statute — Pricing</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230a1628'/%3E%3Ctext x='50' y='72' font-size='65' text-anchor='middle' fill='white' font-family='Georgia,serif'%3ES%3C/text%3E%3C/svg%3E" type="image/svg+xml"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --navy: #0a1628;
+      --navy-2: #0f1e35;
+      --navy-3: #162844;
+      --gold: #c9a84c;
+      --gold-2: #e2c27a;
+      --cream: #f2ede4;
+      --muted: rgba(242,237,228,0.45);
+      --border: rgba(201,168,76,0.2);
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--navy); color: var(--cream); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px); background-size: 72px 72px; pointer-events: none; z-index: 0; }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 24px 60px; border-bottom: 1px solid var(--border); background: rgba(10,22,40,0.92); backdrop-filter: blur(12px); }
+    .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; letter-spacing: 0.28em; color: #fff; text-decoration: none; text-transform: uppercase; }
+    .nav-logo span { color: var(--gold); }
+    .nav-links { display: flex; gap: 32px; align-items: center; }
+    .nav-link { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .nav-link:hover, .nav-link.active { color: var(--cream); }
+    .nav-cta { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); border: 1px solid var(--gold); padding: 10px 22px; text-decoration: none; transition: all 0.3s; }
+    .nav-cta:hover { background: var(--gold); color: var(--navy); }
+
+    .hero { position: relative; z-index: 1; padding: 160px 60px 80px; text-align: center; border-bottom: 1px solid var(--border); }
+    .hero-eyebrow { font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 20px; opacity: 0.7; }
+    .hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(48px, 7vw, 80px); font-weight: 300; color: #fff; line-height: 1.1; margin-bottom: 20px; }
+    .hero-title em { font-style: italic; color: var(--gold); }
+    .hero-sub { font-size: 15px; color: var(--muted); max-width: 480px; margin: 0 auto; line-height: 1.8; }
+
+    .pricing-section { position: relative; z-index: 1; padding: 80px 60px; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); max-width: 1000px; margin: 0 auto; }
+
+    .price-card { background: var(--navy-2); padding: 52px 40px; position: relative; transition: background 0.3s; }
+    .price-card:hover { background: var(--navy-3); }
+    .price-card.featured { background: var(--navy-3); }
+    .price-card.featured::before { content: 'Most Popular'; position: absolute; top: -1px; left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--navy); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; padding: 5px 16px; font-weight: 500; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+
+    .price-tier { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+    .price-name { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 400; color: #fff; margin-bottom: 24px; }
+    .price-amount { font-family: 'Cormorant Garamond', serif; font-size: 56px; font-weight: 300; color: #fff; line-height: 1; margin-bottom: 4px; }
+    .price-amount sup { font-size: 20px; vertical-align: super; color: var(--gold); }
+    .price-period { font-size: 12px; color: var(--muted); margin-bottom: 32px; }
+    .price-divider { height: 1px; background: var(--border); margin-bottom: 28px; }
+    .price-features { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
+    .price-feat { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .price-feat::before { content: '—'; color: var(--gold); flex-shrink: 0; }
+    .price-feat.dim { opacity: 0.35; }
+    .price-feat.dim::before { color: var(--muted); }
+
+    .btn-gold { width: 100%; background: var(--gold); color: var(--navy); border: none; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; padding: 18px; cursor: pointer; transition: all 0.3s; display: block; text-align: center; text-decoration: none; }
+    .btn-gold:hover { background: var(--gold-2); }
+    .btn-outline { width: 100%; background: transparent; color: var(--cream); border: 1px solid var(--border); font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; padding: 18px; cursor: pointer; transition: all 0.3s; display: block; text-align: center; text-decoration: none; }
+    .btn-outline:hover { border-color: rgba(242,237,228,0.4); }
+
+    .faq-section { position: relative; z-index: 1; padding: 80px 60px; border-top: 1px solid var(--border); max-width: 800px; margin: 0 auto; }
+    .section-tag { font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 40px; opacity: 0.7; }
+    .faq-item { border-bottom: 1px solid var(--border); padding: 24px 0; }
+    .faq-q { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: #fff; margin-bottom: 12px; }
+    .faq-a { font-size: 13px; color: var(--muted); line-height: 1.8; }
+
+    footer { position: relative; z-index: 1; border-top: 1px solid var(--border); padding: 32px 60px; display: flex; align-items: center; justify-content: space-between; }
+    .footer-logo { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: #fff; }
+    .footer-logo span { color: var(--gold); }
+    .footer-right { font-size: 11px; color: rgba(242,237,228,0.25); letter-spacing: 0.08em; }
+
+    @media(max-width: 768px) {
+      nav { padding: 20px 24px; }
+      .nav-links { display: none; }
+      .hero { padding: 120px 24px 60px; }
+      .pricing-section { padding: 60px 24px; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .faq-section { padding: 60px 24px; }
+      footer { padding: 24px; flex-direction: column; gap: 12px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="nav-logo">STAT<span>U</span>TE</a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/calculator" class="nav-link">Calculator</a>
+      <a href="/pricing" class="nav-link active">Pricing</a>
+      <a href="/about" class="nav-link">About</a>
+      <a href="/contact" class="nav-link">Contact</a>
+    </div>
+    <a href="/calculator" class="nav-cta">Try the Engine</a>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-eyebrow">Transparent Pricing</div>
+    <h1 class="hero-title">Simple pricing.<br/><em>No surprises.</em></h1>
+    <p class="hero-sub">Every plan includes statutory citations, audit trails, and professional indemnity documentation. Pay per transaction or subscribe for unlimited access.</p>
+  </div>
+
+  <div class="pricing-section">
+    <div class="pricing-grid">
+
+      <div class="price-card">
+        <div class="price-tier">Sole Practitioner</div>
+        <div class="price-name">Starter</div>
+        <div class="price-amount"><sup>£</sup>49</div>
+        <div class="price-period">per transaction</div>
+        <div class="price-divider"></div>
+        <div class="price-features">
+          <div class="price-feat">LBTT calculation engine</div>
+          <div class="price-feat">Section 59 & ADS logic</div>
+          <div class="price-feat">MDR calculation</div>
+          <div class="price-feat">Mixed use & commercial</div>
+          <div class="price-feat">Certificate of Tax Position</div>
+          <div class="price-feat">Statutory citations</div>
+          <div class="price-feat">Audit trail</div>
+          <div class="price-feat dim">Risk dashboard</div>
+          <div class="price-feat dim">Document automation</div>
+          <div class="price-feat dim">API access</div>
+        </div>
+        <a href="/contact" class="btn-outline">Get Started</a>
+      </div>
+
+      <div class="price-card featured">
+        <div class="price-tier">Law Firms</div>
+        <div class="price-name">Professional</div>
+        <div class="price-amount"><sup>£</sup>799</div>
+        <div class="price-period">per month · unlimited transactions</div>
+        <div class="price-divider"></div>
+        <div class="price-features">
+          <div class="price-feat">Everything in Starter</div>
+          <div class="price-feat">Unlimited transactions</div>
+          <div class="price-feat">5 user seats</div>
+          <div class="price-feat">Risk dashboard</div>
+          <div class="price-feat">Document automation</div>
+          <div class="price-feat">Non-resident surcharge logic</div>
+          <div class="price-feat">Linked transaction detection</div>
+          <div class="price-feat">Priority support</div>
+          <div class="price-feat dim">API access</div>
+        </div>
+        <a href="/contact" class="btn-gold">Start Free Trial</a>
+      </div>
+
+      <div class="price-card">
+        <div class="price-tier">Enterprise</div>
+        <div class="price-name">Institution</div>
+        <div class="price-amount" style="font-size:36px;padding-top:8px;">Custom</div>
+        <div class="price-period">annual licence · volume pricing</div>
+        <div class="price-divider"></div>
+        <div class="price-features">
+          <div class="price-feat">Everything in Professional</div>
+          <div class="price-feat">Unlimited seats</div>
+          <div class="price-feat">Full API access</div>
+          <div class="price-feat">AI document extraction</div>
+          <div class="price-feat">Lender certificate integration</div>
+          <div class="price-feat">White-label option</div>
+          <div class="price-feat">Dedicated account manager</div>
+          <div class="price-feat">SLA guarantee</div>
+        </div>
+        <a href="/contact" class="btn-outline">Contact Sales</a>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="faq-section">
+    <div class="section-tag">Frequently Asked Questions</div>
+
+    <div class="faq-item">
+      <div class="faq-q">Is there a free trial?</div>
+      <div class="faq-a">Yes. You can try the LBTT engine and generate sample certificates at statutehq.com/calculator with no account required. For Professional plan access contact us for a 14-day free trial.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Is the Certificate of Tax Position legally defensible?</div>
+      <div class="faq-a">Every certificate includes the specific statutory provisions applied, a timestamped audit trail, and a unique reference number. The calculation is deterministic and traceable to Revenue Scotland's published rates and legislation. We recommend all practitioners review outputs in conjunction with their professional judgement.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Which LBTT scenarios does Statute cover?</div>
+      <div class="faq-a">Statute currently covers standard residential LBTT, Section 59 (6+ unit non-residential treatment), Multiple Dwelling Relief, First-Time Buyer Relief, Additional Dwelling Supplement, mixed use transactions, commercial property, and non-resident buyer surcharge.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I cancel anytime?</div>
+      <div class="faq-a">Yes. Monthly Professional subscriptions can be cancelled at any time with no penalty. Annual enterprise licences are subject to the terms agreed at signing.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">When will England SDLT and Wales LTT be available?</div>
+      <div class="faq-a">England SDLT is planned for Phase 2 (2026). Wales LTT for Phase 3 (2027). Sign up for early access to be notified when these jurisdictions launch.</div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-logo">STAT<span>U</span>TE</div>
+    <div class="footer-right">© 2026 Statute · Bristol, United Kingdom · statutehq.com</div>
+  </footer>
+</body>
+</html>
