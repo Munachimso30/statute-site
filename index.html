@@ -93,18 +93,22 @@
       color: var(--gold);
     }
 
-    .nav-right {
+    .nav-links {
       display: flex;
       align-items: center;
-      gap: 40px;
+      gap: 32px;
     }
 
-    .nav-tag {
+    .nav-link {
       font-size: 11px;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
     }
+
+    .nav-link:hover, .nav-link.active { color: var(--cream); }
 
     .nav-cta {
       font-size: 12px;
@@ -728,11 +732,15 @@
 
   <!-- NAV -->
   <nav>
-    <a href="#" class="nav-logo">Stat<span>u</span>te</a>
-    <div class="nav-right">
-      <span class="nav-tag">Regulatory Intelligence</span>
-      <a href="#access" class="nav-cta">Request Access</a>
+    <a href="/" class="nav-logo">STAT<span>U</span>TE</a>
+    <div class="nav-links">
+      <a href="/" class="nav-link active">Home</a>
+      <a href="/calculator" class="nav-link">Calculator</a>
+      <a href="/pricing" class="nav-link">Pricing</a>
+      <a href="/about" class="nav-link">About</a>
+      <a href="/contact" class="nav-link">Contact</a>
     </div>
+    <a href="/calculator" class="nav-cta">Try the Engine</a>
   </nav>
 
   <!-- HERO -->
@@ -871,7 +879,7 @@
         <div class="jurisdiction-phase">Phase 1 — Active</div>
         <div class="jurisdiction-name">Scotland 🏴󠁧󠁢󠁳󠁣󠁴󠁿</div>
         <div class="jurisdiction-tax">LBTT · ADS · Section 59</div>
-        <span class="jurisdiction-status status-active">In Development</span>
+        <span class="jurisdiction-status status-active">Live</span>
       </div>
       <div class="jurisdiction">
         <div class="jurisdiction-phase">Phase 2</div>

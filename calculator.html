@@ -424,13 +424,11 @@
 
     function handlePropertyType() {
       const propType = document.getElementById('propertyType').value;
-      const unitsGroup = document.getElementById('unitsGroup');
       const residentGroup = document.getElementById('residentGroup');
+      // Units field is always visible — needed for Section 59 detection across all property types
       if (propType === 'residential') {
-        unitsGroup.style.display = 'block';
         residentGroup.style.display = 'block';
       } else {
-        unitsGroup.style.display = 'none';
         residentGroup.style.display = 'none';
       }
     }
@@ -438,7 +436,7 @@
     function calculate() {
       const propertyType = document.getElementById('propertyType').value;
       const unitsEl = document.getElementById('units');
-      const units = propertyType === 'residential' ? (parseInt(unitsEl.value) || 1) : 1;
+      const units = parseInt(unitsEl.value) || 1;
       const price = parseFloat(document.getElementById('price').value);
       const buyerType = document.getElementById('buyerType').value;
       const ownsOther = document.getElementById('ownsOther').value;
