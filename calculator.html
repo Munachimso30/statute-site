@@ -285,8 +285,8 @@
     <div class="logo">STAT<span>U</span>TE</div>
     <div class="tagline">LBTT Compliance Engine · Scotland</div>
 
-    <div class="form-group">
-      <label>Purchase Price (£)</label>
+    <div class="form-group" id="priceGroup">
+      <label id="priceLabel">Purchase Price (£)</label>
       <input type="number" id="price" placeholder="e.g. 1200000" min="0"/>
     </div>
 
@@ -303,6 +303,10 @@
         <option value="residential">Residential</option>
         <option value="mixeduse">Mixed Use (Part Residential / Part Commercial)</option>
         <option value="commercial">Commercial / Non-Residential</option>
+        <option value="lease">Non-Residential Lease (NPV Calculation)</option>
+        <option value="greenfreeport">Green Freeport — Commercial (Designated Tax Site)</option>
+        <option value="sharedownership">Shared Ownership (Initial Purchase)</option>
+        <option value="subsale">Sub-sale / Contract Assignment (LBTT3013)</option>
       </select>
     </div>
 
@@ -322,33 +326,97 @@
       <input type="number" id="units" placeholder="e.g. 6" min="1"/>
     </div>
 
-    <div class="form-group">
-      <label>Buyer Type</label>
-      <select id="buyerType">
-        <option value="">Select buyer type</option>
-        <option value="individual">Individual</option>
-        <option value="company">Company / Corporate Body</option>
-        <option value="firsttime">First-Time Buyer (Individual)</option>
+    <!-- LEASE FIELDS -->
+    <div class="form-group" id="leaseRentGroup" style="display:none">
+      <label>Annual Rent (£)</label>
+      <input type="number" id="annualRent" placeholder="e.g. 120000" min="0"/>
+    </div>
+    <div class="form-group" id="leaseTermGroup" style="display:none">
+      <label>Lease Term (years)</label>
+      <input type="number" id="leaseTerm" placeholder="e.g. 10" min="1"/>
+    </div>
+    <div class="form-group" id="leasePremiumGroup" style="display:none">
+      <label>Premium (£ — leave blank or 0 if none)</label>
+      <input type="number" id="leasePremium" placeholder="e.g. 0" min="0"/>
+    </div>
+    <div class="form-group" id="leaseReviewGroup" style="display:none">
+      <label>Is this a 3-year review of an existing lease?</label>
+      <select id="leaseReview">
+        <option value="no">No — New lease transaction</option>
+        <option value="yes">Yes — 3-year review return required</option>
       </select>
     </div>
 
-    <div class="form-group" id="residentGroup">
-      <label>Is the buyer UK resident?
+    <!-- GREEN FREEPORT FIELD -->
+    <div class="form-group" id="freeportPctGroup" style="display:none">
+      <label>% of Consideration on Qualifying Green Freeport Land
         <span class="tooltip-wrap">
           <span class="tooltip-icon">i</span>
           <div class="tooltip-box">
-            <strong>Non-Resident Surcharge:</strong> Non-UK resident buyers pay an additional 2% ADS surcharge on top of standard ADS. This applies to residential transactions only. Authority: LBTT(S)A 2013 s.24A.
+            <strong>Green Freeport Relief (LBTT3049):</strong><br/>
+            ≥90% qualifying land → Full relief (LBTT = £0)<br/>
+            10–89% qualifying land → Partial relief<br/>
+            &lt;10% qualifying land → No relief, standard commercial rates<br/>
+            Authority: LBTT(S)A 2013 Sch.3A
           </div>
         </span>
       </label>
-      <select id="isResident">
-        <option value="yes">Yes — UK Resident</option>
-        <option value="no">No — Non-UK Resident (+2% ADS surcharge)</option>
-      </select>
+      <input type="number" id="freeportPct" placeholder="e.g. 95" min="0" max="100"/>
+    </div>
+
+    <!-- SUB-SALE FIELDS -->
+    <div class="form-group" id="originalPriceGroup" style="display:none">
+      <label>A's Original Contract Price with B (£)</label>
+      <input type="number" id="originalPrice" placeholder="e.g. 500000" min="0"/>
+    </div>
+    <div class="form-group" id="subsalePriceGroup" style="display:none">
+      <label>C's Sub-sale Price from A (£)</label>
+      <input type="number" id="subsalePrice" placeholder="e.g. 600000" min="0"/>
     </div>
 
     <div class="form-group">
-      <label>Does the buyer own other properties?</label>
+      <label>Buyer Type</label>
+      <select id="buyerType" onchange="handleBuyerType()">
+        <option value="">Select buyer type</option>
+        <optgroup label="Individual Buyers">
+          <option value="individual">Individual</option>
+          <option value="firsttime">First-Time Buyer (Individual)</option>
+          <option value="joint">Joint Purchasers</option>
+          <option value="couple">Married Couple / Civil Partners</option>
+          <option value="cohabitants">Cohabitants</option>
+        </optgroup>
+        <optgroup label="Corporate &amp; Business Buyers">
+          <option value="company">Company / Corporate Body</option>
+          <option value="llp">LLP (Limited Liability Partnership)</option>
+          <option value="partnership_property">Partnership — Property Investment / Dealing</option>
+          <option value="partnership_general">General Partnership (Non-Property Business)</option>
+          <option value="sole_trader_property">Sole Trader — Property Investment / Dealing</option>
+        </optgroup>
+        <optgroup label="Trusts &amp; Pension Funds">
+          <option value="non_bare_trust">Trust (Non-Bare / Discretionary)</option>
+          <option value="bare_trust">Bare Trust</option>
+          <option value="pension">Pension Fund (SSAS / SIPP)</option>
+        </optgroup>
+        <optgroup label="Relief &amp; Exempt Buyers">
+          <option value="charity">Charity / Charitable Trust</option>
+          <option value="rsl">Housing Association / RSL</option>
+          <option value="local_authority">Local Authority</option>
+        </optgroup>
+        <optgroup label="Corporate Relief &amp; Specialist Buyers">
+          <option value="group_relief">Group Relief — Intra-Group Company Transfer</option>
+          <option value="reconstruction">Reconstruction / Acquisition Relief</option>
+          <option value="llp_incorporation">LLP Incorporation Relief</option>
+          <option value="crofting">Crofting Community Body</option>
+          <option value="building_society">Building Society</option>
+          <option value="oeic">Open-Ended Investment Company (OEIC)</option>
+          <option value="planning_obligation">Public Body — Planning Obligation</option>
+          <option value="alt_finance">Alternative Finance Buyer (Islamic Mortgage)</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="form-group" id="ownsOtherGroup">
+      <label id="ownsOtherLabel">Does the buyer own other properties (anywhere in the world)?</label>
       <select id="ownsOther">
         <option value="">Select an option</option>
         <option value="yes">Yes</option>
@@ -416,6 +484,36 @@
         <span class="value gold" id="totalAmount"></span>
       </div>
 
+      <!-- LEASE BREAKDOWN ROWS -->
+      <div class="result-row" id="npvRow" style="display:none">
+        <span class="label">NPV of Rent (3.5% discount rate)</span>
+        <span class="value" id="npvAmount"></span>
+      </div>
+      <div class="result-row" id="rentTaxRow" style="display:none">
+        <span class="label">LBTT on Rent (NPV)</span>
+        <span class="value gold" id="rentTaxAmount"></span>
+      </div>
+      <div class="result-row" id="premiumTaxRow" style="display:none">
+        <span class="label">LBTT on Premium</span>
+        <span class="value gold" id="premiumTaxAmount"></span>
+      </div>
+
+      <!-- SUB-SALE ROWS -->
+      <div class="result-row" id="subsaleARow" style="display:none">
+        <span class="label">Buyer A's LBTT (on differential)</span>
+        <span class="value gold" id="subsaleAAmount"></span>
+      </div>
+      <div class="result-row" id="subsaleCRow" style="display:none">
+        <span class="label">Buyer C's LBTT (on sub-sale price)</span>
+        <span class="value gold" id="subsaleCAmount"></span>
+      </div>
+
+      <!-- 3-YEAR LEASE REVIEW ACTION BOX -->
+      <div class="warning-box" id="leaseReviewBox" style="display:none">
+        <strong>⚠ 3-Year Lease Review — Action Required</strong><br/>
+        Lease 3-year reviews cannot be pre-calculated without your actual rent history from years 1–3. Submit your review return directly through Revenue Scotland's SETS portal at <strong>portal.revenue.scot</strong> within 30 days of the third anniversary of the effective date. Recalculate NPV using actual rent paid in years 1–3 and projected rent for the remaining term. Authority: LBTT(S)A 2013 Sch.19, Para 7.
+      </div>
+
       <div class="saving-box" id="savingBox" style="display:none">
         <div class="saving-label">Tax Saving vs Residential Rate</div>
         <div class="saving-amount" id="savingAmount"></div>
@@ -441,11 +539,10 @@
 
   <script>
     function formatCurrency(amount) {
-      return '£' + amount.toLocaleString('en-GB', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-      });
+      return '£' + amount.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
+
+    // ── LBTT Calculation Functions ────────────────────────────────
 
     function calculateResidentialLBTT(price) {
       // Standard residential rates — LBTT(S)A 2013 s.24
@@ -459,11 +556,9 @@
     }
 
     function calculateFirstTimeBuyerLBTT(price) {
-      // First-time buyer relief — nil rate band raised to £175,000
-      // LBTT(S)A 2013 s.29 & First-time Buyer Relief
-      // Max relief = £600 (difference between standard and FTB nil band)
+      // FTB relief — nil rate band raised to £175,000 — LBTT(S)A 2013 Sch.4A (LBTT3048)
       let tax = 0;
-      if (price <= 175000) return 0; // Full relief — nil rate
+      if (price <= 175000) return 0;
       if (price > 175000) tax += (Math.min(price, 250000) - 175000) * 0.02;
       if (price > 250000) tax += (Math.min(price, 325000) - 250000) * 0.05;
       if (price > 325000) tax += (Math.min(price, 750000) - 325000) * 0.10;
@@ -472,6 +567,7 @@
     }
 
     function calculateNonResidentialLBTT(price) {
+      // Non-residential rates — LBTT(S)A 2013 s.25
       let tax = 0;
       if (price <= 150000) return 0;
       if (price > 150000) tax += (Math.min(price, 250000) - 150000) * 0.01;
@@ -489,191 +585,442 @@
       return Math.max(mdrTax, minimumTax);
     }
 
-    function handlePropertyType() {
-      // Both units and residency fields remain visible for all property types.
-      // Units are needed for Section 59 detection; residency is informational.
-      // Calculation logic handles what applies per property type.
+    function calculateLeaseNPV(annualRent, termYears) {
+      // NPV formula — LBTT(S)A 2013 Schedule 19, Paragraph 7
+      // Temporal discount rate T = 3.5% (set in legislation)
+      // Formula: annualRent × ((1 − (1/(1+T)^n)) / T)
+      if (termYears <= 0 || annualRent <= 0) return 0;
+      const T = 0.035;
+      return Math.round(annualRent * ((1 - Math.pow(1 / (1 + T), termYears)) / T));
     }
+
+    function calculateLeaseTax(npv) {
+      // Lease NPV rates from 7 February 2020 — LBTT(S)A 2013 Schedule 19, Paragraph 3
+      // 0% on NPV up to £150,000 | 1% on £150,001–£2,000,000 | 2% above £2,000,000
+      let tax = 0;
+      if (npv <= 150000) return 0;
+      if (npv > 150000) tax += (Math.min(npv, 2000000) - 150000) * 0.01;
+      if (npv > 2000000) tax += (npv - 2000000) * 0.02;
+      return Math.round(tax);
+    }
+
+    // ── Buyer type classification arrays (verified from Revenue Scotland) ──
+
+    const ALWAYS_ADS = ['company','llp','partnership_property','sole_trader_property','non_bare_trust','pension'];
+    const RELIEF_TYPES = ['charity','rsl','local_authority','group_relief','reconstruction','llp_incorporation','crofting','building_society','oeic','planning_obligation'];
+    const NEEDS_OWNS_OTHER = ['individual','firsttime','joint','couple','cohabitants','partnership_general','bare_trust','alt_finance'];
+
+    // ── Form visibility handlers ───────────────────────────────────
+
+    function handlePropertyType() {
+      const pt = document.getElementById('propertyType').value;
+      const isLease = pt === 'lease';
+      const isSubsale = pt === 'subsale';
+      const isFreeport = pt === 'greenfreeport';
+
+      // Price field — hide for lease (uses rent) and sub-sale (uses two prices)
+      document.getElementById('priceGroup').style.display = (isLease || isSubsale) ? 'none' : 'block';
+
+      // Units field — hide for lease, freeport (commercial), sub-sale
+      document.getElementById('unitsGroup').style.display = (isLease || isFreeport || isSubsale) ? 'none' : 'block';
+
+      // Lease fields
+      ['leaseRentGroup','leaseTermGroup','leasePremiumGroup','leaseReviewGroup'].forEach(id => {
+        document.getElementById(id).style.display = isLease ? 'block' : 'none';
+      });
+
+      // Green Freeport field
+      document.getElementById('freeportPctGroup').style.display = isFreeport ? 'block' : 'none';
+
+      // Sub-sale fields
+      document.getElementById('originalPriceGroup').style.display = isSubsale ? 'block' : 'none';
+      document.getElementById('subsalePriceGroup').style.display = isSubsale ? 'block' : 'none';
+
+      // ADS not applicable to leases — always hide ownsOther for leases
+      if (isLease) {
+        document.getElementById('ownsOtherGroup').style.display = 'none';
+      } else {
+        handleBuyerType(); // Re-evaluate ownsOther visibility
+      }
+    }
+
+    function handleBuyerType() {
+      const bt = document.getElementById('buyerType').value;
+      const ownsGroup = document.getElementById('ownsOtherGroup');
+      const ownsLabel = document.getElementById('ownsOtherLabel');
+      const pt = document.getElementById('propertyType').value;
+
+      // ADS not applicable to leases
+      if (pt === 'lease') { ownsGroup.style.display = 'none'; return; }
+
+      if (ALWAYS_ADS.includes(bt) || RELIEF_TYPES.includes(bt)) {
+        ownsGroup.style.display = 'none';
+      } else {
+        ownsGroup.style.display = 'block';
+        if (bt === 'firsttime') {
+          ownsLabel.textContent = 'Has the buyer EVER owned a residential property anywhere in the world?';
+        } else if (bt === 'joint') {
+          ownsLabel.textContent = 'Does any joint buyer own other properties (anywhere in the world)?';
+        } else if (bt === 'couple' || bt === 'cohabitants') {
+          ownsLabel.textContent = 'Does either buyer own other properties (anywhere in the world)?';
+        } else if (bt === 'partnership_general' || bt === 'bare_trust') {
+          ownsLabel.textContent = 'Does the buyer / any partner / beneficiary own other properties (anywhere in the world)?';
+        } else {
+          ownsLabel.textContent = 'Does the buyer own other properties (anywhere in the world)?';
+        }
+      }
+    }
+
+    // ── ADS Citation builder ───────────────────────────────────────
+
+    function getBuyerADSCitation(bt, ownsOther, price) {
+      const adsApplies = `The Additional Dwelling Supplement (ADS) applies at 8% of the full purchase price (${formatCurrency(Math.round(price * 0.08))}). `;
+      const adsNot = 'The Additional Dwelling Supplement (ADS) does not apply. ';
+      switch(bt) {
+        case 'company': case 'llp':
+          return adsApplies + `As a non-individual buyer, ADS applies to every residential purchase regardless of other property ownership — LBTT(S)A 2013 Sch.2A, LBTT10017.`;
+        case 'non_bare_trust':
+          return adsApplies + `Trustee of non-bare trust where beneficiaries have no relevant interest. ADS applies irrespective of other property ownership — LBTT(S)A 2013 Sch.2A, LBTT10063.`;
+        case 'bare_trust':
+          return (ownsOther === 'yes' ? adsApplies : adsNot) + `For a bare trust, the beneficiary is treated as the buyer for ADS purposes. ADS assessed on beneficiary's property ownership — LBTT(S)A 2013 Sch.2A, LBTT10063.`;
+        case 'pension':
+          return adsApplies + `Pension fund treated as non-individual for LBTT purposes. ADS applies to every residential purchase — LBTT(S)A 2013 Sch.2A, LBTT10017. Note: purchasing residential property may affect the pension scheme's HMRC tax relief status — verify with the scheme administrator.`;
+        case 'charity':
+          return 'LBTT relief applied under LBTT(S)A 2013 Schedule 13 (Charities Relief). Both qualifying conditions must be met: (1) the charity holds or intends to hold the property for qualifying charitable purposes; (2) the transaction is not entered into for LBTT avoidance. ADS reduced proportionately to £0 where full LBTT relief applies — LBTT(S)A 2013 Sch.13.';
+        case 'rsl':
+          return 'LBTT relief applied under LBTT(S)A 2013 Schedule 6 (Relief for Registered Social Landlords). The RSL must be registered with the Scottish Housing Regulator (SHR) and meet one or more qualifying conditions. ADS follows LBTT relief proportionately. Verify all qualifying conditions before filing — LBTT(S)A 2013 Sch.6.';
+        case 'local_authority':
+          return 'Full LBTT and ADS relief applied under LBTT(S)A 2013 Schedule 6A (Local Authority Relief) effective 1 April 2024. Transaction must be under Section 2 of the Housing (Scotland) Act 1987 or 1988 — LBTT(S)A 2013 Sch.6A.';
+        case 'group_relief':
+          return 'LBTT group relief applied under LBTT(S)A 2013 Schedule 10 (LBTT3025). Transaction between companies in the same qualifying group. LBTT = £0, ADS = £0. Relief subject to clawback if companies cease to be in the same group within 3 years of the effective date. Verify group structure conditions before filing.';
+        case 'reconstruction':
+          return 'LBTT reconstruction or acquisition relief applied under LBTT(S)A 2013 Schedule 11 (LBTT3027–3033). Property acquired in the course of a bona fide commercial reconstruction or acquisition. LBTT = £0. Subject to clawback conditions. Verify all conditions before filing.';
+        case 'llp_incorporation':
+          return 'LBTT LLP incorporation relief applied under LBTT(S)A 2013 Schedule 16 (LBTT3034). Transfer made in connection with the incorporation of an LLP. Members of the LLP must be the same persons who had a right to the property before incorporation. LBTT = £0 — LBTT(S)A 2013 Sch.16.';
+        case 'crofting':
+          return 'Crofting Community Right to Buy relief applied under LBTT(S)A 2013 Schedule 14 (LBTT3024). Buyer is a Crofting Community Body exercising the right to buy under the Land Reform (Scotland) Act 2003. LBTT = £0, ADS = £0 — LBTT(S)A 2013 Sch.14.';
+        case 'building_society':
+          return 'Building Society relief applied under LBTT(S)A 2013 Schedule 7A (LBTT3037). LBTT = £0 for qualifying transactions. Verify all statutory conditions for building society relief are met before filing — LBTT(S)A 2013 Sch.7A.';
+        case 'oeic':
+          return 'Open-Ended Investment Company (OEIC) relief applied under the Land and Buildings Transaction Tax (Open-ended Investment Companies) (Scotland) Regulations 2015 (LBTT3047). LBTT = £0 for qualifying conversion of an authorised unit trust to, or amalgamation with, an OEIC — LBTT(S)A 2013 s.46.';
+        case 'planning_obligation':
+          return 'Planning obligations relief applied under LBTT(S)A 2013 Schedule 15 (LBTT3039). Public body acquiring chargeable interest from developer to comply with a planning obligation under section 75 of the Town and Country Planning (Scotland) Act 1997. LBTT = £0. All three qualifying conditions must be verified before filing.';
+        case 'alt_finance':
+          return (ownsOther === 'yes' ? adsApplies : adsNot) + `Alternative property finance relief under LBTT(S)A 2013 Schedule 9 (LBTT3020). Land sold to financial institution and re-sold to buyer. LBTT charged once — on the re-sale to buyer. The financial institution's purchase is exempt. ADS rules follow standard individual buyer rules — LBTT(S)A 2013 Sch.9.`;
+        case 'joint':
+          return (ownsOther === 'yes' ? adsApplies : adsNot) + `For joint purchasers, ADS applies if any buyer owns more than one dwelling at the effective date and is not replacing their only or main residence — LBTT(S)A 2013 Sch.2A, LBTT10061. Note: if any joint buyer is a non-individual (e.g. a company), ADS applies automatically to the whole transaction — LBTT10017.`;
+        case 'couple':
+          return (ownsOther === 'yes' ? adsApplies : adsNot) + `Married couples and civil partners are treated as one economic unit — property owned by either counts towards the dwelling total — LBTT(S)A 2013 Sch.2A, LBTT10062.`;
+        case 'cohabitants':
+          return (ownsOther === 'yes' ? adsApplies : adsNot) + `Cohabitants (those living together as though married) are treated as one economic unit for ADS purposes — LBTT(S)A 2013 Sch.2A, LBTT10062.`;
+        case 'partnership_property':
+          return adsApplies + `Buyer is a partner in a property investment/dealing business. Excluded from main residence replacement rule — ADS applies always — LBTT(S)A 2013 Sch.2A, LBTT10017.`;
+        case 'sole_trader_property':
+          return adsApplies + `Buyer is a sole trader in property investment/dealing. Excluded from main residence replacement rule — ADS applies to every residential purchase — LBTT(S)A 2013 Sch.2A, LBTT10017.`;
+        case 'partnership_general':
+          return (ownsOther === 'yes' ? adsApplies : adsNot) + `For a general partnership not engaged in property investment/dealing, legislation looks through to the individual partners. ADS assessed on individual partner property ownership — LBTT(S)A 2013 Sch.2A, LBTT7001.`;
+        case 'firsttime':
+          if (ownsOther === 'yes') {
+            return adsApplies + `First-Time Buyer Relief is not available as the buyer has previously owned residential property anywhere in the world. Standard residential rates applied — LBTT(S)A 2013 Sch.4A.`;
+          }
+          return adsNot + `First-Time Buyer Relief applied. Nil rate band extended to £175,000. The buyer has never previously owned residential property anywhere in the world. ADS does not apply — LBTT(S)A 2013 Sch.4A.`;
+        default: // individual
+          return (ownsOther === 'yes' ? adsApplies : adsNot) + (ownsOther === 'yes'
+            ? `The buyer owns one or more residential properties anywhere in the world — LBTT(S)A 2013 Sch.2A, The Land and Buildings Transaction Tax (Additional Amount — Second Homes Main Residence Relief) (Scotland) Order 2017.`
+            : `The buyer does not own other residential properties anywhere in the world — LBTT(S)A 2013 Sch.2A.`);
+      }
+    }
+
+    // ── Helper: reset special result rows ─────────────────────────
+
+    function resetSpecialRows() {
+      ['npvRow','rentTaxRow','premiumTaxRow','subsaleARow','subsaleCRow'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+      document.getElementById('leaseReviewBox').style.display = 'none';
+      document.getElementById('mdrRow').style.display = 'none';
+    }
+
+    // ── Helper: connected parties check ───────────────────────────
+
+    function checkConnectedParties() {
+      const buyerNameVal = document.getElementById('buyerName').value.toLowerCase().trim();
+      const firmNameVal = document.getElementById('firmName').value.toLowerCase().trim();
+      const warning = document.getElementById('connectedWarning');
+      if (buyerNameVal && firmNameVal && buyerNameVal.length > 2 && firmNameVal.length > 2) {
+        const buyerWords = buyerNameVal.split(' ').filter(w => w.length > 3);
+        const firmWords = firmNameVal.split(' ').filter(w => w.length > 3);
+        warning.style.display = buyerWords.some(w => firmWords.includes(w)) ? 'block' : 'none';
+      } else {
+        warning.style.display = 'none';
+      }
+    }
+
+    // ── Helper: show result UI ────────────────────────────────────
+
+    function showResult(rateBand, lbttAmount, adsAmount, citationText, showSaving, savingAmount) {
+      document.getElementById('rateBand').textContent = rateBand;
+      document.getElementById('lbttAmount').textContent = formatCurrency(lbttAmount);
+      const adsEl = document.getElementById('adsAmount');
+      adsEl.textContent = formatCurrency(adsAmount);
+      adsEl.className = 'value ' + (adsAmount === 0 ? 'green' : 'red');
+      document.getElementById('totalAmount').textContent = formatCurrency(lbttAmount + adsAmount);
+      document.getElementById('citation').innerHTML = citationText;
+      if (showSaving && savingAmount > 0) {
+        document.getElementById('savingBox').style.display = 'block';
+        document.getElementById('savingAmount').textContent = formatCurrency(savingAmount) + ' saved';
+      } else {
+        document.getElementById('savingBox').style.display = 'none';
+      }
+      document.getElementById('result').style.display = 'block';
+      document.getElementById('downloadBtn').style.display = 'block';
+      document.getElementById('emailSection').style.display = 'block';
+      checkConnectedParties();
+    }
+
+    // ── Main calculate function ───────────────────────────────────
 
     function calculate() {
       const propertyType = document.getElementById('propertyType').value;
-      const unitsEl = document.getElementById('units');
-      const units = parseInt(unitsEl.value) || 1;
-      const price = parseFloat(document.getElementById('price').value);
       const buyerType = document.getElementById('buyerType').value;
       const ownsOther = document.getElementById('ownsOther').value;
-      const isResident = document.getElementById('isResident').value;
       const errorMsg = document.getElementById('errorMsg');
-
-      if (!price || !buyerType || !ownsOther) {
-        errorMsg.style.display = 'block';
-        return;
-      }
-      if (propertyType === 'residential' && !units) {
-        errorMsg.style.display = 'block';
-        return;
-      }
       errorMsg.style.display = 'none';
+      resetSpecialRows();
 
-      // Mixed use and commercial always use non-residential rates
+      const isNonIndividual = ALWAYS_ADS.includes(buyerType);
+      const isRelief = RELIEF_TYPES.includes(buyerType);
+      const isFirstTime = buyerType === 'firsttime';
+      const needsOwnsOther = NEEDS_OWNS_OTHER.includes(buyerType);
+
+      // ── NON-RESIDENTIAL LEASE ──────────────────────────────────
+      if (propertyType === 'lease') {
+        const annualRent = parseFloat(document.getElementById('annualRent').value) || 0;
+        const leaseTerm = parseInt(document.getElementById('leaseTerm').value) || 0;
+        const leasePremium = parseFloat(document.getElementById('leasePremium').value) || 0;
+        const leaseReview = document.getElementById('leaseReview').value;
+
+        if (!buyerType || !annualRent || !leaseTerm) { errorMsg.style.display = 'block'; return; }
+
+        document.getElementById('s59').innerHTML = '<span style="color:rgba(242,237,228,0.5)">Not applicable</span>';
+
+        if (leaseReview === 'yes') {
+          document.getElementById('leaseReviewBox').style.display = 'block';
+          document.getElementById('result').style.display = 'block';
+          document.getElementById('downloadBtn').style.display = 'none';
+          document.getElementById('emailSection').style.display = 'none';
+          document.getElementById('rateBand').textContent = 'Non-Residential Lease';
+          document.getElementById('lbttAmount').textContent = '—';
+          document.getElementById('adsAmount').textContent = '£0';
+          document.getElementById('adsAmount').className = 'value green';
+          document.getElementById('totalAmount').textContent = '—';
+          document.getElementById('savingBox').style.display = 'none';
+          document.getElementById('citation').innerHTML = `<strong>3-Year Review:</strong> Submit via Revenue Scotland SETS portal at portal.revenue.scot within 30 days of the third anniversary. Recalculate NPV using actual rent paid — LBTT(S)A 2013 Sch.19, Para 7.`;
+          return;
+        }
+
+        const npv = calculateLeaseNPV(annualRent, leaseTerm);
+        const rentTax = calculateLeaseTax(npv);
+        const premiumTax = leasePremium > 0 ? calculateNonResidentialLBTT(leasePremium) : 0;
+        const totalLBTT = rentTax + premiumTax;
+
+        document.getElementById('npvRow').style.display = 'flex';
+        document.getElementById('rentTaxRow').style.display = 'flex';
+        document.getElementById('npvAmount').textContent = formatCurrency(npv);
+        document.getElementById('rentTaxAmount').textContent = formatCurrency(rentTax);
+        if (leasePremium > 0) {
+          document.getElementById('premiumTaxRow').style.display = 'flex';
+          document.getElementById('premiumTaxAmount').textContent = formatCurrency(premiumTax);
+        }
+
+        const leaseCitation = `
+          <strong>Statutory Authority:</strong><br/>
+          Land and Buildings Transaction Tax (Scotland) Act 2013 — Schedule 19 (Lease Transactions)<br/><br/>
+          <strong>NPV Calculation:</strong> ${formatCurrency(annualRent)} annual rent × ((1 − (1/1.035^${leaseTerm})) / 0.035) = ${formatCurrency(npv)}<br/>
+          Temporal discount rate: 3.5% (set in legislation — LBTT(S)A 2013 Sch.19, Para 7)<br/><br/>
+          <strong>Lease LBTT Rates (from 7 February 2020):</strong><br/>
+          0% on NPV up to £150,000 | 1% on £150,001–£2,000,000 | 2% above £2,000,000<br/>
+          ${leasePremium > 0 ? `Premium of ${formatCurrency(leasePremium)} taxed at non-residential purchase rates — Sch.19, Para 3. If average annual rent ≥ £1,000, nil rate band does not apply to the premium.<br/>` : ''}
+          ADS does not apply to lease transactions.<br/><br/>
+          <strong>Note:</strong> A 3-year review return must be submitted within 30 days of each 3rd anniversary of the effective date — LBTT(S)A 2013 Sch.19, Para 7.<br/><br/>
+          <strong>Revenue Scotland Reference:</strong> LBTT(S)A 2013 Sch.19
+        `;
+        showResult('Non-Residential Lease', totalLBTT, 0, leaseCitation, false, 0);
+        return;
+      }
+
+      // ── SUB-SALE / CONTRACT ASSIGNMENT (LBTT3013) ─────────────
+      if (propertyType === 'subsale') {
+        const originalPrice = parseFloat(document.getElementById('originalPrice').value) || 0;
+        const subsalePrice = parseFloat(document.getElementById('subsalePrice').value) || 0;
+        if (!buyerType || !originalPrice || !subsalePrice) { errorMsg.style.display = 'block'; return; }
+
+        const aDifferential = Math.max(originalPrice - subsalePrice, 0);
+        const aLBTT = calculateNonResidentialLBTT(aDifferential);
+        const cLBTT = calculateNonResidentialLBTT(subsalePrice);
+
+        document.getElementById('subsaleARow').style.display = 'flex';
+        document.getElementById('subsaleCRow').style.display = 'flex';
+        document.getElementById('subsaleAAmount').textContent = formatCurrency(aLBTT);
+        document.getElementById('subsaleCAmount').textContent = formatCurrency(cLBTT);
+        document.getElementById('s59').innerHTML = '<span style="color:rgba(242,237,228,0.5)">Not applicable</span>';
+
+        const subsaleCitation = `
+          <strong>Statutory Authority:</strong><br/>
+          Land and Buildings Transaction Tax (Scotland) Act 2013 — s.49 / LBTT3013 (Sub-sale Relief)<br/><br/>
+          <strong>Buyer A (original contractor):</strong> LBTT on differential (${formatCurrency(originalPrice)} − ${formatCurrency(subsalePrice)} = ${formatCurrency(aDifferential)}) = ${formatCurrency(aLBTT)}<br/>
+          <strong>Buyer C (sub-purchaser):</strong> LBTT on sub-sale price (${formatCurrency(subsalePrice)}) = ${formatCurrency(cLBTT)}<br/><br/>
+          Each party must submit a separate LBTT return. The sub-sale must complete at the same time as the original transaction for relief to apply — LBTT(S)A 2013 s.49.<br/><br/>
+          <strong>Revenue Scotland Reference:</strong> LBTT(S)A 2013 s.49, LBTT3013
+        `;
+        showResult('Sub-sale (LBTT3013)', aLBTT + cLBTT, 0, subsaleCitation, false, 0);
+        return;
+      }
+
+      // ── GREEN FREEPORT ─────────────────────────────────────────
+      if (propertyType === 'greenfreeport') {
+        const price = parseFloat(document.getElementById('price').value);
+        const freeportPct = parseFloat(document.getElementById('freeportPct').value) || 0;
+        if (!buyerType || !price) { errorMsg.style.display = 'block'; return; }
+
+        let lbttAmount, rateBand, citation;
+        if (freeportPct >= 90) {
+          lbttAmount = 0;
+          rateBand = 'Green Freeport — Full Relief';
+          citation = `<strong>Statutory Authority:</strong><br/>LBTT(S)A 2013 Schedule 3A (LBTT3049) — Green Freeport Relief<br/><br/>${freeportPct}% of the chargeable consideration is on qualifying designated Green Freeport tax site land. Full relief applies (≥90% threshold met). LBTT = £0.<br/><br/><strong>Note:</strong> Relief is subject to a control period. If qualifying use ceases within the control period, a further LBTT return must be submitted within 30 days — LBTT(S)A 2013 Sch.3A, LBTT3049.`;
+        } else if (freeportPct >= 10) {
+          const qualifying = Math.round(price * freeportPct / 100);
+          const nonQualifying = price - qualifying;
+          lbttAmount = calculateNonResidentialLBTT(nonQualifying);
+          rateBand = 'Green Freeport — Partial Relief';
+          citation = `<strong>Statutory Authority:</strong><br/>LBTT(S)A 2013 Schedule 3A (LBTT3049) — Green Freeport Partial Relief<br/><br/>${freeportPct}% (${formatCurrency(qualifying)}) is qualifying Green Freeport land. Partial relief applied — LBTT calculated only on non-qualifying portion (${formatCurrency(nonQualifying)}) at commercial rates.<br/><br/><strong>Revenue Scotland Reference:</strong> LBTT(S)A 2013 Sch.3A, LBTT3049`;
+        } else {
+          lbttAmount = calculateNonResidentialLBTT(price);
+          rateBand = 'Commercial (No Freeport Relief)';
+          citation = `<strong>Statutory Authority:</strong><br/>LBTT(S)A 2013 s.25 — Non-residential rates applied. Green Freeport relief requires at least 10% of consideration on qualifying land. ${freeportPct}% does not meet minimum threshold — LBTT(S)A 2013 Sch.3A, LBTT3049.<br/><br/><strong>Revenue Scotland Reference:</strong> LBTT(S)A 2013 s.25`;
+        }
+
+        document.getElementById('s59').innerHTML = '<span style="color:rgba(242,237,228,0.5)">Not applicable</span>';
+        showResult(rateBand, lbttAmount, 0, citation, false, 0);
+        return;
+      }
+
+      // ── SHARED OWNERSHIP ───────────────────────────────────────
+      if (propertyType === 'sharedownership') {
+        const price = parseFloat(document.getElementById('price').value);
+        if (!price || !buyerType || (needsOwnsOther && !ownsOther)) { errorMsg.style.display = 'block'; return; }
+
+        const lbttAmount = isRelief ? 0 : calculateResidentialLBTT(price);
+        const adsAmount = isNonIndividual ? Math.round(price * 0.08) : (ownsOther === 'yes' ? Math.round(price * 0.08) : 0);
+        const adsCitation = getBuyerADSCitation(buyerType, ownsOther, price);
+
+        document.getElementById('s59').innerHTML = '<span style="color:rgba(242,237,228,0.5)">Not applicable</span>';
+        const citation = `
+          <strong>Statutory Authority:</strong><br/>
+          Land and Buildings Transaction Tax (Scotland) Act 2013 — Section 24<br/><br/>
+          Shared ownership initial purchase. LBTT calculated on actual consideration paid for the initial share (${formatCurrency(price)}), not the market value of the whole property — LBTT(S)A 2013 s.24.<br/><br/>
+          ${adsCitation}<br/><br/>
+          <strong>Note:</strong> Each subsequent staircasing acquisition is a separate LBTT event. A further LBTT return must be submitted for each additional share purchased.<br/><br/>
+          <strong>Revenue Scotland Reference:</strong> LBTT(S)A 2013 s.24
+        `;
+        showResult('Shared Ownership', lbttAmount, adsAmount, citation, false, 0);
+        return;
+      }
+
+      // ── STANDARD TRANSACTIONS ──────────────────────────────────
+      const price = parseFloat(document.getElementById('price').value);
+      const units = parseInt(document.getElementById('units').value) || 1;
+
+      if (!price || !buyerType || (needsOwnsOther && !ownsOther)) { errorMsg.style.display = 'block'; return; }
+      if (propertyType === 'residential' && !units) { errorMsg.style.display = 'block'; return; }
+
       const isMixedOrCommercial = propertyType === 'mixeduse' || propertyType === 'commercial';
       const section59Triggered = propertyType === 'residential' && units >= 6;
       const mdrApplicable = propertyType === 'residential' && units >= 2 && units <= 5;
-      let lbttAmount = 0;
-      let adsAmount = 0;
-      let rateBand = '';
-      let citationText = '';
-      let residentialEquivalent = 0;
-      let mdrApplied = false;
-      let mdrConsidered = false;
+
+      let lbttAmount = 0, adsAmount = 0, rateBand = '', citationText = '';
+      let residentialEquivalent = 0, mdrApplied = false, mdrConsidered = false;
 
       if (isMixedOrCommercial) {
-        // Mixed use or commercial — non-residential rates, no ADS
         lbttAmount = calculateNonResidentialLBTT(price);
-        adsAmount = 0;
         rateBand = propertyType === 'mixeduse' ? 'Mixed Use' : 'Commercial';
-        citationText = `
-          <strong>Statutory Authority:</strong><br/>
-          Land and Buildings Transaction Tax (Scotland) Act 2013<br/>
-          ${propertyType === 'mixeduse' ?
-            'Section 25 — Mixed use transactions. This transaction involves both residential and non-residential elements. Non-residential LBTT rates apply to the whole transaction. ADS does not apply.' :
-            'Non-residential rates apply. ADS does not apply to commercial property transactions.'
-          }<br/><br/>
-          <strong>Revenue Scotland Reference:</strong> LBTT(S)A 2013 s.25
-        `;
+        citationText = `<strong>Statutory Authority:</strong><br/>Land and Buildings Transaction Tax (Scotland) Act 2013<br/>${propertyType === 'mixeduse' ? 'Section 25 — Mixed use transactions. Non-residential LBTT rates apply to the whole transaction. ADS does not apply.' : 'Non-residential rates apply. ADS does not apply to commercial property transactions.'}<br/><br/><strong>Revenue Scotland Reference:</strong> LBTT(S)A 2013 s.25`;
+
       } else if (section59Triggered) {
         lbttAmount = calculateNonResidentialLBTT(price);
-        adsAmount = 0;
-        rateBand = 'Non-Residential';
-        citationText = `
-          <strong>Statutory Authority:</strong><br/>
-          Land and Buildings Transaction Tax (Scotland) Act 2013<br/>
-          Section 59 — Transactions involving 6 or more dwellings<br/><br/>
-          As this transaction involves ${units} dwellings acquired in a single transaction,
-          it is treated as a non-residential transaction by virtue of Section 59 of the
-          LBTT(S)A 2013. Non-residential rates apply and the Additional Dwelling
-          Supplement (ADS) does not apply.<br/><br/>
-          <strong>Revenue Scotland Reference:</strong> LBTT(S)A 2013 s.59
-        `;
+        rateBand = 'Non-Residential (s.59)';
+        citationText = `<strong>Statutory Authority:</strong><br/>Land and Buildings Transaction Tax (Scotland) Act 2013<br/>Section 59 — Transactions involving 6 or more dwellings<br/><br/>This transaction involves ${units} dwellings in a single transaction. Treated as non-residential by virtue of LBTT(S)A 2013 s.59. Non-residential rates apply and ADS does not apply.<br/><br/><strong>Revenue Scotland Reference:</strong> LBTT(S)A 2013 s.59`;
         residentialEquivalent = calculateResidentialLBTT(price);
-        if (ownsOther === 'yes') {
-          residentialEquivalent += Math.round(price * 0.08);
-        }
-      } else {
-        const isFirstTime = buyerType === 'firsttime';
+        if (!isRelief && !isNonIndividual) { if (ownsOther === 'yes') residentialEquivalent += Math.round(price * 0.08); }
+        else if (isNonIndividual) { residentialEquivalent += Math.round(price * 0.08); }
 
+      } else if (isRelief) {
+        lbttAmount = 0; adsAmount = 0;
+        rateBand = buyerType === 'charity' ? 'Charity Relief (Sch.13)' :
+                   buyerType === 'rsl' ? 'RSL Relief (Sch.6)' :
+                   buyerType === 'local_authority' ? 'Local Authority Relief (Sch.6A)' :
+                   buyerType === 'group_relief' ? 'Group Relief (Sch.10)' :
+                   buyerType === 'reconstruction' ? 'Reconstruction Relief (Sch.11)' :
+                   buyerType === 'llp_incorporation' ? 'LLP Incorporation Relief (Sch.16)' :
+                   buyerType === 'crofting' ? 'Crofting Community Relief (Sch.14)' :
+                   buyerType === 'building_society' ? 'Building Society Relief (Sch.7A)' :
+                   buyerType === 'oeic' ? 'OEIC Relief' :
+                   buyerType === 'planning_obligation' ? 'Planning Obligations Relief (Sch.15)' : 'Relief Applied';
+        citationText = `<strong>Statutory Authority:</strong><br/>Land and Buildings Transaction Tax (Scotland) Act 2013<br/>Section 24 — Residential property rates and bands<br/><br/>${getBuyerADSCitation(buyerType, ownsOther, price)}<br/><br/><strong>Revenue Scotland Reference:</strong> LBTT(S)A 2013 s.24`;
+
+      } else {
         if (mdrApplicable && !isFirstTime) {
-          // Multiple Dwelling Relief applies for 2-5 units
           const mdrTax = calculateMDR(price, units);
           const standardTax = calculateResidentialLBTT(price);
-          // Only apply MDR if it results in less tax
-          if (mdrTax < standardTax) {
-            lbttAmount = mdrTax;
-            mdrApplied = true;
-          } else {
-            lbttAmount = standardTax;
-            mdrConsidered = true;
-          }
+          if (mdrTax < standardTax) { lbttAmount = mdrTax; mdrApplied = true; }
+          else { lbttAmount = standardTax; mdrConsidered = true; }
         } else if (isFirstTime) {
-          lbttAmount = calculateFirstTimeBuyerLBTT(price);
+          lbttAmount = ownsOther === 'yes' ? calculateResidentialLBTT(price) : calculateFirstTimeBuyerLBTT(price);
         } else {
           lbttAmount = calculateResidentialLBTT(price);
         }
 
-        // ADS — includes non-resident surcharge
-        let adsRate = 0.08;
-        if (isResident === 'no') adsRate += 0.02; // Non-resident surcharge +2%
-        adsAmount = ownsOther === 'yes' ? Math.round(price * adsRate) : 0;
-        // Non-resident buyers also pay surcharge even if no other properties
-        if (isResident === 'no' && ownsOther === 'no') {
-          adsAmount = Math.round(price * 0.02); // 2% non-resident only
-        }
+        adsAmount = isNonIndividual ? Math.round(price * 0.08) : (ownsOther === 'yes' ? Math.round(price * 0.08) : 0);
         rateBand = mdrApplied ? 'Residential (MDR)' : 'Residential';
 
-        const ftbRelief = isFirstTime && price <= 175000 ?
-          '<br/><br/><strong>First-Time Buyer Relief Applied:</strong> Nil rate band extended to £175,000 under LBTT(S)A 2013 s.29. Maximum relief of £600.' :
-          isFirstTime && price > 175000 ?
-          '<br/><br/><strong>First-Time Buyer Relief Applied:</strong> Reduced nil rate band of £175,000 applies. Full relief not available as purchase price exceeds £175,000.' : '';
-
         const mdrNote = mdrApplied ?
-          `<br/><br/><strong>Multiple Dwelling Relief Applied:</strong> This transaction involves ${units} dwellings. MDR has been applied under LBTT(S)A 2013 Schedule 5. Tax calculated on average price per dwelling (£${Math.round(price/units).toLocaleString('en-GB')}) and multiplied by number of dwellings, subject to minimum tax floor of 25% of standard LBTT. Revenue Scotland Reference: LBTT(S)A 2013 Sch.5` :
+          `<br/><br/><strong>Multiple Dwelling Relief Applied:</strong> ${units} dwellings. MDR applied under LBTT(S)A 2013 Sch.5. Tax on average price per dwelling (${formatCurrency(Math.round(price/units))}) × ${units} dwellings, subject to 25% minimum floor. Rev. Scotland Ref: LBTT(S)A 2013 Sch.5` :
           mdrConsidered ?
-          `<br/><br/><strong>MDR Evaluated — Not Applied:</strong> Multiple Dwelling Relief was assessed for this ${units}-unit transaction under LBTT(S)A 2013 Schedule 5. Standard residential rates produce a lower liability. MDR not claimed. Revenue Scotland Reference: LBTT(S)A 2013 Sch.5` : '';
+          `<br/><br/><strong>MDR Evaluated — Not Applied:</strong> MDR assessed for this ${units}-unit transaction under LBTT(S)A 2013 Sch.5. Standard residential rates produce a lower liability. MDR not claimed.` : '';
 
-        citationText = `
-          <strong>Statutory Authority:</strong><br/>
-          Land and Buildings Transaction Tax (Scotland) Act 2013<br/>
-          Section 24 — Residential property rates and bands<br/><br/>
-          ${ownsOther === 'yes' ?
-            'The Additional Dwelling Supplement (ADS) applies at 8% of the full purchase price as the buyer owns one or more existing residential properties. Authority: The Land and Buildings Transaction Tax (Additional Amount — Second Homes Main Residence Relief) (Scotland) Order 2017.' :
-            'The Additional Dwelling Supplement (ADS) does not apply as the buyer does not own other residential properties.'
-          }${ftbRelief}<br/><br/>
-          <strong>Revenue Scotland Reference:</strong> LBTT(S)A 2013 s.24${mdrNote}
-        `;
+        citationText = `<strong>Statutory Authority:</strong><br/>Land and Buildings Transaction Tax (Scotland) Act 2013<br/>Section 24 — Residential property rates and bands<br/><br/>${getBuyerADSCitation(buyerType, ownsOther, price)}${mdrNote}<br/><br/><strong>Revenue Scotland Reference:</strong> LBTT(S)A 2013 s.24`;
       }
-
-      const totalAmount = lbttAmount + adsAmount;
-      const saving = residentialEquivalent - totalAmount;
 
       document.getElementById('s59').innerHTML = section59Triggered ?
         '<span class="section-tag">YES — Section 59 Triggered</span>' :
         '<span style="color:rgba(242,237,228,0.5)">Not applicable</span>';
 
-      document.getElementById('rateBand').textContent = rateBand;
-
-      // MDR row
       if (mdrApplied) {
         document.getElementById('mdrRow').style.display = 'flex';
         document.getElementById('mdrStatus').innerHTML = '<span class="section-tag">YES — Schedule 5 Applied</span>';
-      } else {
-        document.getElementById('mdrRow').style.display = 'none';
-      }
-      document.getElementById('lbttAmount').textContent = formatCurrency(lbttAmount);
-
-      const adsEl = document.getElementById('adsAmount');
-      adsEl.textContent = formatCurrency(adsAmount);
-      adsEl.className = 'value ' + (adsAmount === 0 ? 'green' : 'red');
-
-      document.getElementById('totalAmount').textContent = formatCurrency(totalAmount);
-      document.getElementById('citation').innerHTML = citationText;
-
-      if (section59Triggered && saving > 0) {
-        document.getElementById('savingBox').style.display = 'block';
-        document.getElementById('savingAmount').textContent = formatCurrency(saving) + ' saved';
-      } else {
-        document.getElementById('savingBox').style.display = 'none';
       }
 
-      document.getElementById('result').style.display = 'block';
-
-      // Connected parties check
-      const buyerNameVal = document.getElementById('buyerName').value.toLowerCase().trim();
-      const firmNameVal = document.getElementById('firmName').value.toLowerCase().trim();
-      const warning = document.getElementById('connectedWarning');
-
-      if (buyerNameVal && firmNameVal && buyerNameVal.length > 2 && firmNameVal.length > 2) {
-        const buyerWords = buyerNameVal.split(' ').filter(w => w.length > 3);
-        const firmWords = firmNameVal.split(' ').filter(w => w.length > 3);
-        const hasMatch = buyerWords.some(word => firmWords.includes(word));
-        warning.style.display = hasMatch ? 'block' : 'none';
-      } else {
-        warning.style.display = 'none';
-      }
-      document.getElementById('downloadBtn').style.display = 'block';
-      document.getElementById('emailSection').style.display = 'block';
+      const saving = residentialEquivalent - (lbttAmount + adsAmount);
+      showResult(rateBand, lbttAmount, adsAmount, citationText, section59Triggered && saving > 0, saving);
     }
+
+    // ── PDF Certificate ────────────────────────────────────────────
 
     function downloadCertificate() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-      const price = parseFloat(document.getElementById('price').value);
-      const units = parseInt(document.getElementById('units').value);
+      const propertyType = document.getElementById('propertyType').value;
+      const isLease = propertyType === 'lease';
+      const isSubsale = propertyType === 'subsale';
+      const isGreenFreeport = propertyType === 'greenfreeport';
+      const isSharedOwnership = propertyType === 'sharedownership';
+
       const rateBand = document.getElementById('rateBand').textContent;
-      const section59 = units >= 6 && rateBand === 'Non-Residential';
+      const section59 = rateBand.includes('s.59');
+      const mdrAppliedPDF = rateBand.includes('MDR');
       const lbtt = document.getElementById('lbttAmount').textContent;
       const ads = document.getElementById('adsAmount').textContent;
       const total = document.getElementById('totalAmount').textContent;
-  const mdrAppliedPDF = rateBand.includes('MDR');
       const buyerName = document.getElementById('buyerName').value || 'Not specified';
       const firmName = document.getElementById('firmName').value || 'Not specified';
       const solicitorName = document.getElementById('solicitorName').value || 'Not specified';
@@ -699,7 +1046,6 @@
       doc.setFontSize(24);
       doc.setFont('helvetica', 'bold');
       doc.text('STATUTE', 20, 30);
-
       doc.setTextColor(201, 168, 76);
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
@@ -713,17 +1059,14 @@
       doc.text('Reference: ' + refNum, 190, 32, { align: 'right' });
       doc.text('Issued: ' + dateStr, 190, 38, { align: 'right' });
 
-      // Divider
       doc.setDrawColor(201, 168, 76);
       doc.setLineWidth(0.3);
       doc.line(20, 44, 190, 44);
 
-      // Certificate title
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
       doc.text('LBTT TAX POSITION CERTIFICATE', 20, 56);
-
       doc.setTextColor(150, 130, 90);
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
@@ -734,23 +1077,19 @@
       doc.setDrawColor(201, 168, 76);
       doc.setLineWidth(0.3);
       doc.rect(20, 70, 170, 48, 'FD');
-
       doc.setTextColor(201, 168, 76);
       doc.setFontSize(8);
       doc.setFont('helvetica', 'bold');
       doc.text('PARTIES TO THE TRANSACTION', 28, 79);
-
       doc.setDrawColor(201, 168, 76);
       doc.setLineWidth(0.2);
       doc.line(28, 81, 182, 81);
-
       doc.setTextColor(150, 130, 90);
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
       doc.text('Buyer / Purchaser:', 28, 90);
       doc.text('Acting Firm:', 28, 100);
       doc.text('Solicitor:', 28, 110);
-
       doc.setTextColor(255, 255, 255);
       doc.text(buyerName, 90, 90);
       doc.text(firmName, 90, 100);
@@ -761,33 +1100,64 @@
       doc.setDrawColor(201, 168, 76);
       doc.setLineWidth(0.3);
       doc.rect(20, 126, 170, 48, 'FD');
-
       doc.setTextColor(201, 168, 76);
       doc.setFontSize(8);
       doc.setFont('helvetica', 'bold');
       doc.text('TRANSACTION DETAILS', 28, 135);
-
       doc.setDrawColor(201, 168, 76);
       doc.setLineWidth(0.2);
       doc.line(28, 137, 182, 137);
-
       doc.setTextColor(150, 130, 90);
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
-      doc.text('Number of Units:', 28, 146);
-      doc.text('Purchase Price:', 28, 155);
-      doc.text('Rate Classification:', 28, 164);
-      doc.text('Section 59 Applied:', 28, 173);
 
-      doc.setTextColor(255, 255, 255);
-      doc.text(units.toString(), 120, 146);
-      doc.text('£' + price.toLocaleString('en-GB'), 120, 155);
-      doc.text(rateBand, 120, 164);
-      doc.text(section59 ? 'YES — s.59 LBTT(S)A 2013' : 'NO', 120, 173);
+      const fmt = (n) => '£' + Math.round(n).toLocaleString('en-GB');
 
-      // Compute MDR workings
+      if (isLease) {
+        const annualRent = parseFloat(document.getElementById('annualRent').value) || 0;
+        const leaseTerm = parseInt(document.getElementById('leaseTerm').value) || 0;
+        const leasePremium = parseFloat(document.getElementById('leasePremium').value) || 0;
+        const npv = calculateLeaseNPV(annualRent, leaseTerm);
+        doc.text('Transaction Type:', 28, 146);
+        doc.text('Annual Rent:', 28, 155);
+        doc.text('Lease Term:', 28, 164);
+        doc.text('NPV of Rent (3.5%):', 28, 173);
+        doc.setTextColor(255, 255, 255);
+        doc.text('Non-Residential Lease', 110, 146);
+        doc.text(fmt(annualRent), 110, 155);
+        doc.text(leaseTerm + ' years', 110, 164);
+        doc.text(fmt(npv), 110, 173);
+      } else if (isSubsale) {
+        const originalPrice = parseFloat(document.getElementById('originalPrice').value) || 0;
+        const subsalePrice = parseFloat(document.getElementById('subsalePrice').value) || 0;
+        doc.text('Transaction Type:', 28, 146);
+        doc.text("A's Original Contract Price:", 28, 155);
+        doc.text("C's Sub-sale Price:", 28, 164);
+        doc.text('Rate Classification:', 28, 173);
+        doc.setTextColor(255, 255, 255);
+        doc.text('Sub-sale / Contract Assignment', 110, 146);
+        doc.text(fmt(originalPrice), 110, 155);
+        doc.text(fmt(subsalePrice), 110, 164);
+        doc.text(rateBand, 110, 173);
+      } else {
+        const price = parseFloat(document.getElementById('price').value);
+        const units = parseInt(document.getElementById('units').value) || 1;
+        doc.text('Number of Units:', 28, 146);
+        doc.text('Purchase Price:', 28, 155);
+        doc.text('Rate Classification:', 28, 164);
+        doc.text('Section 59 Applied:', 28, 173);
+        doc.setTextColor(255, 255, 255);
+        doc.text(isGreenFreeport || isSharedOwnership ? '1' : units.toString(), 110, 146);
+        doc.text(fmt(price), 110, 155);
+        doc.text(rateBand, 110, 164);
+        doc.text(section59 ? 'YES — s.59 LBTT(S)A 2013' : 'NO', 110, 173);
+      }
+
+      // MDR WORKINGS (only for standard residential MDR)
       let mdrW = null;
-      if (mdrAppliedPDF) {
+      if (mdrAppliedPDF && !isLease && !isSubsale) {
+        const price = parseFloat(document.getElementById('price').value);
+        const units = parseInt(document.getElementById('units').value);
         const limits = [145000, 250000, 325000, 750000, Infinity];
         const rates = [0, 0.02, 0.05, 0.10, 0.12];
         const calcLBTT = (amt) => {
@@ -804,21 +1174,15 @@
         const mdrRaw = lbttOnAvg * units;
         const stdLBTT = calcLBTT(price);
         const floor = Math.round(stdLBTT * 0.25);
-        mdrW = { avg, lbttOnAvg, mdrRaw, stdLBTT, floor, floorApplied: floor > mdrRaw };
+        mdrW = { avg, lbttOnAvg, mdrRaw, stdLBTT, floor, floorApplied: floor > mdrRaw, price, units };
       }
 
-      const fmt = (n) => '£' + Math.round(n).toLocaleString('en-GB');
-      const LX = 28;   // label x (left-aligned)
-      const VX = 182;  // value x (right-aligned)
-
-      // ── TAX CALCULATION BOX ──────────────────────────────────
-      // MDR layout verified: last content at y≈256, box ends at 263, fits in 297mm page
+      const LX = 28, VX = 182;
       const taxH = mdrAppliedPDF ? 81 : 55;
       doc.setFillColor(15, 30, 53);
       doc.setDrawColor(201, 168, 76);
       doc.setLineWidth(0.3);
       doc.rect(20, 182, 170, taxH, 'FD');
-
       doc.setTextColor(201, 168, 76);
       doc.setFontSize(8);
       doc.setFont('helvetica', 'bold');
@@ -828,16 +1192,13 @@
       doc.line(LX, 193, VX, 193);
 
       if (mdrAppliedPDF && mdrW) {
-        // MDR workings subheader
         doc.setTextColor(201, 168, 76);
         doc.setFontSize(6.5);
         doc.setFont('helvetica', 'bold');
         doc.text('MDR WORKINGS  —  LBTT(S)A 2013 Sch.5', LX, 199);
-
-        // 4 workings rows, 6pt spacing, all in two aligned columns
         const workRows = [
-          ['Avg price per dwelling  (' + fmt(price) + ' / ' + units + ' units)', fmt(mdrW.avg)],
-          ['LBTT on ' + fmt(mdrW.avg) + '  x  ' + units + ' dwellings  (MDR subtotal)', fmt(mdrW.mdrRaw)],
+          ['Avg price per dwelling  (' + fmt(mdrW.price) + ' / ' + mdrW.units + ' units)', fmt(mdrW.avg)],
+          ['LBTT on ' + fmt(mdrW.avg) + '  x  ' + mdrW.units + ' dwellings  (MDR subtotal)', fmt(mdrW.mdrRaw)],
           ['Standard LBTT on full price  (25% floor basis)', fmt(mdrW.stdLBTT)],
           ['25% statutory minimum floor', fmt(mdrW.floor)],
         ];
@@ -850,8 +1211,6 @@
           doc.text(row[1], VX, wy, { align: 'right' });
           wy += 6;
         });
-
-        // Floor applies indicator
         if (mdrW.floorApplied) {
           doc.setTextColor(201, 168, 76);
           doc.setFontSize(6);
@@ -859,14 +1218,10 @@
           doc.text('FLOOR APPLIES  —  s.Sch.5 para.5(3)', LX + 2, wy + 1);
         }
         wy += 6;
-
-        // Separator
         doc.setDrawColor(100, 90, 60);
         doc.setLineWidth(0.2);
         doc.line(LX, wy, VX, wy);
         wy += 7;
-
-        // LBTT / ADS / Total — all in same two columns
         doc.setTextColor(150, 130, 90);
         doc.setFontSize(8.5);
         doc.setFont('helvetica', 'normal');
@@ -874,44 +1229,35 @@
         doc.setTextColor(201, 168, 76);
         doc.text(lbtt, VX, wy, { align: 'right' });
         wy += 7;
-
         doc.setTextColor(150, 130, 90);
         doc.text('ADS Liability:', LX, wy);
         doc.setTextColor(92, 184, 138);
         doc.text(ads, VX, wy, { align: 'right' });
         wy += 5;
-
         doc.setDrawColor(100, 90, 60);
         doc.line(LX, wy, VX, wy);
         wy += 6;
-
         doc.setTextColor(150, 130, 90);
         doc.setFontSize(8.5);
-        doc.setFont('helvetica', 'normal');
         doc.text('TOTAL TAX LIABILITY:', LX, wy);
         doc.setTextColor(201, 168, 76);
         doc.setFontSize(11);
         doc.setFont('helvetica', 'bold');
         doc.text(total, VX, wy, { align: 'right' });
-
       } else {
-        // Standard (non-MDR) two-column layout
         doc.setTextColor(150, 130, 90);
         doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
         doc.text('LBTT Liability:', LX, 202);
         doc.setTextColor(201, 168, 76);
         doc.text(lbtt, VX, 202, { align: 'right' });
-
         doc.setTextColor(150, 130, 90);
         doc.text('ADS Liability:', LX, 212);
         doc.setTextColor(92, 184, 138);
         doc.text(ads, VX, 212, { align: 'right' });
-
         doc.setDrawColor(100, 90, 60);
         doc.setLineWidth(0.2);
         doc.line(LX, 218, VX, 218);
-
         doc.setTextColor(150, 130, 90);
         doc.text('TOTAL TAX LIABILITY:', LX, 228);
         doc.setTextColor(201, 168, 76);
@@ -920,43 +1266,50 @@
         doc.text(total, VX, 228, { align: 'right' });
       }
 
-      // ── STATUTORY AUTHORITY BOX ──────────────────────────────
-      // Positions verified: MDR ends at 297mm, standard ends at 294mm
+      // STATUTORY AUTHORITY BOX
       const statY = 182 + taxH + 3;
       const statH = mdrAppliedPDF ? 16 : 42;
-
       doc.setFillColor(15, 30, 53);
       doc.setDrawColor(60, 50, 20);
       doc.setLineWidth(0.3);
       doc.rect(20, statY, 170, statH, 'FD');
       doc.setFillColor(201, 168, 76);
       doc.rect(20, statY, 3, statH, 'F');
-
       doc.setTextColor(201, 168, 76);
       doc.setFontSize(7.5);
       doc.setFont('helvetica', 'bold');
       doc.text('STATUTORY AUTHORITY', 30, statY + 7);
-
       doc.setTextColor(200, 190, 170);
       doc.setFontSize(7);
       doc.setFont('helvetica', 'normal');
 
-      if (mdrAppliedPDF) {
-        // Single citation line — Act name already in cert header, no repetition
-        doc.text('LBTT(S)A 2013 Schedule 5 — Multiple Dwellings Relief applied.  Rev. Scotland Ref: Sch.5', 30, statY + 13);
-      } else if (section59) {
-        doc.text('Land and Buildings Transaction Tax (Scotland) Act 2013', 30, statY + 14);
-        doc.text('Section 59 — Transactions involving 6 or more dwellings', 30, statY + 21);
-        doc.text('Non-residential rates applied. ADS not applicable.', 30, statY + 28);
-        doc.text('Revenue Scotland Reference: LBTT(S)A 2013 s.59', 30, statY + 35);
-      } else {
-        doc.text('Land and Buildings Transaction Tax (Scotland) Act 2013', 30, statY + 14);
-        doc.text('Section 24 — Residential property rates and bands applied.', 30, statY + 21);
-        doc.text('Residential rates applied.', 30, statY + 28);
-        doc.text('Revenue Scotland Reference: LBTT(S)A 2013 s.24', 30, statY + 35);
-      }
+      const getStatLines = () => {
+        if (isLease) return ['LBTT(S)A 2013 Schedule 19 — Lease Transaction.', 'Discount rate 3.5% (Sch.19, Para 7).', 'Rates (7 Feb 2020): 0% to £150k | 1% to £2m | 2% above £2m.'];
+        if (isSubsale) return ['LBTT(S)A 2013 s.49 / LBTT3013 — Sub-sale Relief.', 'Two separate LBTT returns required.'];
+        if (rateBand.includes('Green Freeport')) return ['LBTT(S)A 2013 Schedule 3A — Green Freeport Relief.', 'LBTT3049.'];
+        if (isSharedOwnership) return ['LBTT(S)A 2013 s.24 — Residential rates on initial share consideration.', 'Each staircasing acquisition requires a separate LBTT return.'];
+        if (mdrAppliedPDF) return ['LBTT(S)A 2013 Schedule 5 — Multiple Dwellings Relief applied.', 'Rev. Scotland Ref: Sch.5'];
+        if (section59) return ['Land and Buildings Transaction Tax (Scotland) Act 2013', 'Section 59 — 6+ dwellings treated as non-residential.', 'Non-residential rates applied. ADS not applicable.', 'Revenue Scotland Reference: LBTT(S)A 2013 s.59'];
+        if (rateBand.includes('Charity')) return ['LBTT(S)A 2013 Schedule 13 — Charities Relief.', 'Verify qualifying conditions before filing.'];
+        if (rateBand.includes('RSL')) return ['LBTT(S)A 2013 Schedule 6 — RSL Relief.', 'Verify SHR registration and qualifying conditions.'];
+        if (rateBand.includes('Local Authority')) return ['LBTT(S)A 2013 Schedule 6A — Local Authority Relief.', 'Effective 1 April 2024.'];
+        if (rateBand.includes('Group Relief')) return ['LBTT(S)A 2013 Schedule 10 — Group Relief.', 'Subject to 3-year clawback conditions.'];
+        if (rateBand.includes('Reconstruction')) return ['LBTT(S)A 2013 Schedule 11 — Reconstruction/Acquisition Relief.'];
+        if (rateBand.includes('LLP Incorporation')) return ['LBTT(S)A 2013 Schedule 16 — LLP Incorporation Relief.'];
+        if (rateBand.includes('Crofting')) return ['LBTT(S)A 2013 Schedule 14 — Crofting Community Right to Buy Relief.'];
+        if (rateBand.includes('Building Society')) return ['LBTT(S)A 2013 Schedule 7A — Building Society Relief.'];
+        if (rateBand.includes('OEIC')) return ['Land and Buildings Transaction Tax (Open-ended Investment Companies)', '(Scotland) Regulations 2015 — LBTT(S)A 2013 s.46.'];
+        if (rateBand.includes('Planning')) return ['LBTT(S)A 2013 Schedule 15 — Planning Obligations Relief.', 'LBTT3039.'];
+        if (rateBand === 'Mixed Use' || rateBand === 'Commercial') return ['Land and Buildings Transaction Tax (Scotland) Act 2013', 'Section 25 — Non-residential / Mixed Use rates applied.', 'ADS does not apply.', 'Revenue Scotland Reference: LBTT(S)A 2013 s.25'];
+        return ['Land and Buildings Transaction Tax (Scotland) Act 2013', 'Section 24 — Residential property rates and bands applied.', 'Residential rates applied.', 'Revenue Scotland Reference: LBTT(S)A 2013 s.24'];
+      };
 
-      // ── AUDIT FOOTER ─────────────────────────────────────────
+      const statLines = getStatLines();
+      statLines.forEach((line, i) => {
+        doc.text(line, 30, statY + 14 + (i * 7));
+      });
+
+      // AUDIT FOOTER
       const auditY = statY + statH + 3;
       doc.setFillColor(10, 22, 40);
       doc.setDrawColor(40, 35, 15);
@@ -967,7 +1320,6 @@
       doc.text('AUDIT RECORD — Generated by Statute on ' + dateStr + ' at ' + timeStr + ' UTC', 105, auditY + 5, { align: 'center' });
       doc.text('Reference: ' + refNum + '  |  statutehq.com', 105, auditY + 10, { align: 'center' });
 
-      // Gold bottom border
       doc.setDrawColor(201, 168, 76);
       doc.setLineWidth(0.5);
       doc.line(0, 293, 210, 293);
@@ -975,25 +1327,19 @@
       doc.save('Statute-Certificate-' + refNum + '.pdf');
 
       // Log to admin dashboard
-      const lbttNum = parseInt(document.getElementById('lbttAmount').textContent.replace(/[£,]/g, ''));
-      const adsNum = parseInt(document.getElementById('adsAmount').textContent.replace(/[£,]/g, ''));
-      const totalNum = parseInt(document.getElementById('totalAmount').textContent.replace(/[£,]/g, ''));
+      const price = parseFloat(document.getElementById('price').value) || 0;
+      const units = parseInt(document.getElementById('units').value) || 1;
+      const lbttNum = parseInt(document.getElementById('lbttAmount').textContent.replace(/[£,]/g, '')) || 0;
+      const adsNum = parseInt(document.getElementById('adsAmount').textContent.replace(/[£,]/g, '')) || 0;
+      const totalNum = parseInt(document.getElementById('totalAmount').textContent.replace(/[£,]/g, '')) || 0;
       const savingEl = document.getElementById('savingAmount');
       const savingNum = savingEl ? parseInt((savingEl.textContent || '0').replace(/[^0-9]/g, '')) || 0 : 0;
       const existing = JSON.parse(localStorage.getItem('statute_certificates') || '[]');
-      existing.push({
-        ref: refNum,
-        date: dateStr + ' ' + timeStr,
-        units: units,
-        price: price,
-        section59: section59,
-        lbtt: lbttNum,
-        ads: adsNum,
-        total: totalNum,
-        saving: savingNum
-      });
+      existing.push({ ref: refNum, date: dateStr + ' ' + timeStr, units, price, section59, lbtt: lbttNum, ads: adsNum, total: totalNum, saving: savingNum });
       localStorage.setItem('statute_certificates', JSON.stringify(existing));
     }
+
+    // ── Email Certificate ──────────────────────────────────────────
 
     function emailCertificate() {
       const toEmail = document.getElementById('recipientEmail').value.trim();
@@ -1010,21 +1356,42 @@
         return;
       }
 
-      // Gather all transaction data
-      const price = parseFloat(document.getElementById('price').value);
-      const units = parseInt(document.getElementById('units').value) || 1;
+      const propertyType = document.getElementById('propertyType').value;
       const buyerName = document.getElementById('buyerName').value || 'Not specified';
       const lbtt = document.getElementById('lbttAmount').textContent;
       const ads = document.getElementById('adsAmount').textContent;
       const total = document.getElementById('totalAmount').textContent;
       const rateBand = document.getElementById('rateBand').textContent;
-      const section59 = units >= 6 && rateBand === 'Non-Residential';
-      const isMDR = rateBand.includes('MDR');
-      const statutoryNote = section59
-        ? 'Section 59 applied — 6+ dwellings treated as non-residential. ADS not applicable. Authority: LBTT(S)A 2013 s.59'
-        : isMDR
-        ? 'Multiple Dwelling Relief applied under LBTT(S)A 2013 Schedule 5. Tax calculated on average price per dwelling, subject to 25% minimum floor.'
-        : 'Standard residential rates applied. Authority: LBTT(S)A 2013 s.24';
+
+      // Build purchase price field
+      let purchasePrice = '—';
+      if (propertyType === 'lease') {
+        const rent = parseFloat(document.getElementById('annualRent').value) || 0;
+        const term = parseInt(document.getElementById('leaseTerm').value) || 0;
+        purchasePrice = `Annual rent: £${rent.toLocaleString('en-GB')} over ${term} years`;
+      } else if (propertyType === 'subsale') {
+        const orig = parseFloat(document.getElementById('originalPrice').value) || 0;
+        const sub = parseFloat(document.getElementById('subsalePrice').value) || 0;
+        purchasePrice = `Original: £${orig.toLocaleString('en-GB')} | Sub-sale: £${sub.toLocaleString('en-GB')}`;
+      } else {
+        const p = parseFloat(document.getElementById('price').value) || 0;
+        purchasePrice = '£' + p.toLocaleString('en-GB');
+      }
+
+      // Build statutory note
+      const statutoryNote = rateBand.includes('s.59') ? 'Section 59 applied — 6+ dwellings treated as non-residential. ADS not applicable. Authority: LBTT(S)A 2013 s.59' :
+        rateBand.includes('MDR') ? 'Multiple Dwelling Relief applied under LBTT(S)A 2013 Schedule 5. Tax calculated on average price per dwelling, subject to 25% minimum floor.' :
+        rateBand.includes('Lease') ? 'Non-residential lease transaction. LBTT calculated on NPV of rent. ADS does not apply. Authority: LBTT(S)A 2013 Sch.19.' :
+        rateBand.includes('Sub-sale') ? 'Sub-sale / contract assignment. Two-party LBTT calculation. Authority: LBTT(S)A 2013 s.49 / LBTT3013.' :
+        rateBand.includes('Freeport') ? 'Green Freeport Relief. Authority: LBTT(S)A 2013 Sch.3A, LBTT3049.' :
+        rateBand.includes('Shared Ownership') ? 'Shared ownership initial purchase. LBTT on consideration paid for share. Authority: LBTT(S)A 2013 s.24.' :
+        rateBand.includes('Charity') ? 'Charities Relief applied. Authority: LBTT(S)A 2013 Sch.13.' :
+        rateBand.includes('RSL') ? 'RSL Relief applied. Authority: LBTT(S)A 2013 Sch.6.' :
+        rateBand.includes('Local Authority') ? 'Local Authority Relief applied from 1 April 2024. Authority: LBTT(S)A 2013 Sch.6A.' :
+        rateBand.includes('Group Relief') ? 'Group Relief applied. Subject to clawback conditions. Authority: LBTT(S)A 2013 Sch.10.' :
+        rateBand.includes('Mixed Use') ? 'Mixed use transaction. Non-residential rates applied. ADS not applicable. Authority: LBTT(S)A 2013 s.25.' :
+        rateBand.includes('Commercial') ? 'Commercial / Non-residential rates applied. ADS not applicable. Authority: LBTT(S)A 2013 s.25.' :
+        'Standard residential rates applied. Authority: LBTT(S)A 2013 s.24';
 
       const now = new Date();
       const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -1041,7 +1408,7 @@
         buyer_name: buyerName,
         ref_number: refNum,
         date: dateStr,
-        purchase_price: '£' + price.toLocaleString('en-GB'),
+        purchase_price: purchasePrice,
         rate_band: rateBand,
         lbtt_amount: lbtt,
         ads_amount: ads,
