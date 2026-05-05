@@ -210,6 +210,27 @@
       display: none;
     }
 
+    /* PROPERTY TYPE DESCRIPTION PANEL */
+    .prop-desc {
+      display: none;
+      margin-top: 10px;
+      background: rgba(201,168,76,0.05);
+      border-left: 2px solid rgba(201,168,76,0.4);
+      padding: 12px 14px;
+      font-size: 12px;
+      color: rgba(242,237,228,0.7);
+      line-height: 1.7;
+    }
+    .prop-desc.visible { display: block; }
+    .prop-desc strong { color: #c9a84c; }
+    .prop-desc .prop-auth {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: rgba(201,168,76,0.5);
+    }
+
     /* EMAIL CERTIFICATE SECTION */
     .email-section {
       display: none;
@@ -291,14 +312,7 @@
     </div>
 
     <div class="form-group">
-      <label>Property Type
-        <span class="tooltip-wrap">
-          <span class="tooltip-icon">i</span>
-          <div class="tooltip-box">
-            <strong>Mixed Use:</strong> A property that is partly residential and partly non-residential (e.g. shop with flat above). Non-residential LBTT rates apply to the whole transaction. ADS does not apply. Authority: LBTT(S)A 2013 s.25.
-          </div>
-        </span>
-      </label>
+      <label>Property Type</label>
       <select id="propertyType" onchange="handlePropertyType()">
         <option value="residential">Residential</option>
         <option value="mixeduse">Mixed Use (Part Residential / Part Commercial)</option>
@@ -308,6 +322,7 @@
         <option value="sharedownership">Shared Ownership (Initial Purchase)</option>
         <option value="subsale">Sub-sale / Contract Assignment (LBTT3013)</option>
       </select>
+      <div class="prop-desc" id="propDesc"></div>
     </div>
 
     <div class="form-group" id="unitsGroup">
@@ -618,29 +633,42 @@
       const isSubsale = pt === 'subsale';
       const isFreeport = pt === 'greenfreeport';
 
-      // Price field — hide for lease (uses rent) and sub-sale (uses two prices)
-      document.getElementById('priceGroup').style.display = (isLease || isSubsale) ? 'none' : 'block';
+      // ── Property type description panel ────────────────────────
+      const descriptions = {
+        residential: '',
+        mixeduse: '<strong>Mixed Use</strong> — A property with both residential and non-residential elements (e.g. a shop with a flat above). Non-residential LBTT rates apply to the entire transaction. ADS does not apply.<br/><span class="prop-auth">Authority: LBTT(S)A 2013 s.25</span>',
+        commercial: '<strong>Commercial / Non-Residential</strong> — Offices, retail units, industrial premises, land, or any other non-residential property. Non-residential LBTT rates apply. ADS does not apply.<br/><span class="prop-auth">Authority: LBTT(S)A 2013 s.25</span>',
+        lease: '<strong>Non-Residential Lease</strong> — LBTT is calculated on the Net Present Value (NPV) of rent using a statutory 3.5% temporal discount rate. Enter the annual rent and lease term — NPV is calculated automatically. Any premium is taxed separately at non-residential purchase rates. ADS does not apply to lease transactions. A 3-year review return must be filed with Revenue Scotland at each 3rd anniversary of the effective date.<br/><span class="prop-auth">Authority: LBTT(S)A 2013 Schedule 19 · Rates from 7 Feb 2020: 0% (NPV to £150k) · 1% (to £2m) · 2% (above £2m)</span>',
+        greenfreeport: '<strong>Green Freeport — Commercial</strong> — Full LBTT relief (£0) where 90%+ of the consideration relates to qualifying land on a designated Green Freeport tax site (currently: Forth Green Freeport; Inverness &amp; Cromarty Firth Green Freeport). Partial relief applies for 10–89%. No relief if under 10%. Relief is subject to clawback if qualifying use ceases within the control period.<br/><span class="prop-auth">Authority: LBTT(S)A 2013 Schedule 3A (LBTT3049)</span>',
+        sharedownership: '<strong>Shared Ownership — Initial Purchase</strong> — LBTT is calculated on the actual consideration paid for the initial share only, not the full market value of the property. Standard ADS rules apply based on the buyer\'s existing property ownership. Each subsequent staircasing acquisition is a separate LBTT event requiring a new return to Revenue Scotland.<br/><span class="prop-auth">Authority: LBTT(S)A 2013 s.24</span>',
+        subsale: '<strong>Sub-sale / Contract Assignment</strong> — Where Buyer A contracts to purchase from Seller B, then assigns or sub-sells to Buyer C before completion. Two separate LBTT liabilities arise: A pays LBTT on the differential between A\'s contract price and C\'s sub-sale price (or £0 if sub-sale price ≥ original price); C pays standard LBTT on the sub-sale price. Both parties must submit separate LBTT returns. The sub-sale must complete simultaneously with the original transaction.<br/><span class="prop-auth">Authority: LBTT(S)A 2013 s.49 / LBTT3013</span>'
+      };
 
-      // Units field — hide for lease, freeport (commercial), sub-sale
+      const descEl = document.getElementById('propDesc');
+      if (descriptions[pt]) {
+        descEl.innerHTML = descriptions[pt];
+        descEl.classList.add('visible');
+      } else {
+        descEl.innerHTML = '';
+        descEl.classList.remove('visible');
+      }
+
+      // ── Field visibility ────────────────────────────────────────
+      document.getElementById('priceGroup').style.display = (isLease || isSubsale) ? 'none' : 'block';
       document.getElementById('unitsGroup').style.display = (isLease || isFreeport || isSubsale) ? 'none' : 'block';
 
-      // Lease fields
       ['leaseRentGroup','leaseTermGroup','leasePremiumGroup','leaseReviewGroup'].forEach(id => {
         document.getElementById(id).style.display = isLease ? 'block' : 'none';
       });
 
-      // Green Freeport field
       document.getElementById('freeportPctGroup').style.display = isFreeport ? 'block' : 'none';
-
-      // Sub-sale fields
       document.getElementById('originalPriceGroup').style.display = isSubsale ? 'block' : 'none';
       document.getElementById('subsalePriceGroup').style.display = isSubsale ? 'block' : 'none';
 
-      // ADS not applicable to leases — always hide ownsOther for leases
       if (isLease) {
         document.getElementById('ownsOtherGroup').style.display = 'none';
       } else {
-        handleBuyerType(); // Re-evaluate ownsOther visibility
+        handleBuyerType();
       }
     }
 
