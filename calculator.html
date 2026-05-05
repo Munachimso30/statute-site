@@ -944,6 +944,12 @@
       .then(() => {
         successEl.style.display = 'block';
         btn.textContent = 'Sent ✓';
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = 'Send →';
+          document.getElementById('recipientEmail').value = '';
+          successEl.style.display = 'none';
+        }, 3000);
       })
       .catch(() => {
         errorEl.textContent = 'Failed to send. Please try again or download the PDF.';
