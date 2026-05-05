@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Statute — LBTT Calculator</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230a1628'/%3E%3Ctext x='50' y='72' font-size='65' text-anchor='middle' fill='white' font-family='Georgia,serif'%3ES%3C/text%3E%3C/svg%3E" type="image/svg+xml"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Georgia', serif;
+      background: #0a1628;
+      color: #f2ede4;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .container {
+      background: #0f1e35;
+      border: 1px solid rgba(201,168,76,0.3);
+      padding: 48px;
+      max-width: 600px;
+      width: 100%;
+    }
+    .logo {
+      font-size: 28px;
+      letter-spacing: 0.3em;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+    .logo span { color: #c9a84c; }
+    .tagline {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: rgba(201,168,76,0.6);
+      text-transform: uppercase;
+      margin-bottom: 40px;
+    }
+    .form-group { margin-bottom: 24px; }
+    label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(201,168,76,0.8);
+      margin-bottom: 8px;
+    }
+    input, select {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(201,168,76,0.2);
+      color: #f2ede4;
+      font-family: 'Georgia', serif;
+      font-size: 16px;
+      padding: 14px 16px;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: rgba(201,168,76,0.6); }
+    select option { background: #0f1e35; }
+    .btn {
+      width: 100%;
+      background: #c9a84c;
+      color: #0a1628;
+      border: none;
+      font-family: 'Georgia', serif;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 18px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .btn:hover { background: #e2c27a; }
+    .btn-outline {
+      width: 100%;
+      background: transparent;
+      border: 1px solid #c9a84c;
+      color: #c9a84c;
+      font-family: 'Georgia', serif;
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 18px;
+      cursor: pointer;
+      margin-top: 16px;
+      display: none;
+    }
+    .btn-outline:hover { background: rgba(201,168,76,0.1); }
+    .result {
+      display: none;
+      margin-top: 40px;
+      border-top: 1px solid rgba(201,168,76,0.2);
+      padding-top: 32px;
+    }
+    .result-title {
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(201,168,76,0.6);
+      margin-bottom: 20px;
+    }
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 14px;
+    }
+    .result-row .label { color: rgba(242,237,228,0.6); }
+    .result-row .value { color: #ffffff; font-size: 16px; }
+    .result-row .value.gold { color: #c9a84c; font-size: 20px; }
+    .result-row .value.green { color: #5cb88a; }
+    .result-row .value.red { color: #e07070; }
+    .section-tag {
+      background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.3);
+      color: #c9a84c;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      display: inline-block;
+    }
+    .citation {
+      margin-top: 24px;
+      background: rgba(0,0,0,0.3);
+      border-left: 2px solid #c9a84c;
+      padding: 16px;
+      font-size: 12px;
+      color: rgba(242,237,228,0.6);
+      line-height: 1.7;
+    }
+    .citation strong { color: #c9a84c; }
+    .saving-box {
+      margin-top: 20px;
+      background: rgba(92,184,138,0.08);
+      border: 1px solid rgba(92,184,138,0.2);
+      padding: 20px;
+      text-align: center;
+    }
+    .saving-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(92,184,138,0.7);
+      margin-bottom: 8px;
+    }
+    .saving-amount { font-size: 32px; color: #5cb88a; }
+    /* TOOLTIP */
+    .tooltip-wrap {
+      position: relative;
+      display: inline-block;
+      margin-left: 8px;
+      cursor: pointer;
+    }
+    .tooltip-icon {
+      width: 16px;
+      height: 16px;
+      background: rgba(201,168,76,0.2);
+      border: 1px solid rgba(201,168,76,0.4);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #c9a84c;
+      font-family: Georgia, serif;
+      font-style: italic;
+      vertical-align: middle;
+    }
+    .tooltip-box {
+      display: none;
+      position: absolute;
+      left: 24px;
+      top: -8px;
+      width: 280px;
+      background: #0f1e35;
+      border: 1px solid rgba(201,168,76,0.3);
+      padding: 14px 16px;
+      font-size: 12px;
+      line-height: 1.7;
+      color: rgba(242,237,228,0.8);
+      z-index: 100;
+    }
+    .tooltip-wrap:hover .tooltip-box { display: block; }
+    .tooltip-box strong { color: #c9a84c; }
+
+    /* WARNING BOX */
+    .warning-box {
+      display: none;
+      margin-top: 16px;
+      background: rgba(224,112,112,0.08);
+      border: 1px solid rgba(224,112,112,0.3);
+      border-left: 3px solid #e07070;
+      padding: 14px 16px;
+      font-size: 12px;
+      color: rgba(242,237,228,0.8);
+      line-height: 1.7;
+    }
+    .warning-box strong { color: #e07070; }
+
+    .error {
+      color: #e07070;
+      font-size: 12px;
+      margin-top: 8px;
+      display: none;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <nav style="position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid rgba(201,168,76,0.2);background:rgba(10,22,40,0.95);backdrop-filter:blur(12px);">
+    <a href="/" style="font-family:'Georgia',serif;font-size:18px;letter-spacing:0.28em;color:#ffffff;text-decoration:none;text-transform:uppercase;">STAT<span style="color:#c9a84c">U</span>TE</a>
+    <div style="display:flex;gap:28px;align-items:center;">
+      <a href="/" style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(242,237,228,0.5);text-decoration:none;">Home</a>
+      <a href="/calculator" style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(242,237,228,0.5);text-decoration:none;">Calculator</a>
+      <a href="/contact" style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(242,237,228,0.5);text-decoration:none;">Contact</a>
+    </div>
+  </nav>
+
+  <div class="container" style="margin-top:88px;">
+    <div class="logo">STAT<span>U</span>TE</div>
+    <div class="tagline">LBTT Compliance Engine · Scotland</div>
+
+    <div class="form-group">
+      <label>Number of Units Being Purchased
+        <span class="tooltip-wrap">
+          <span class="tooltip-icon">i</span>
+          <div class="tooltip-box">
+            <strong>Why units matter:</strong><br/>
+            6+ units → Section 59 applies (non-residential rates, no ADS)<br/>
+            2-5 units → Multiple Dwelling Relief (MDR) may apply<br/>
+            1 unit → Standard residential rates<br/><br/>
+            <strong>What is MDR?</strong> Multiple Dwelling Relief (LBTT(S)A 2013 Sch.5) calculates tax on the average price per dwelling, which can significantly reduce LBTT for 2-5 unit purchases.
+          </div>
+        </span>
+      </label>
+      <input type="number" id="units" placeholder="e.g. 6" min="1"/>
+    </div>
+
+    <div class="form-group">
+      <label>Purchase Price (£)</label>
+      <input type="number" id="price" placeholder="e.g. 1200000" min="0"/>
+    </div>
+
+    <div class="form-group">
+      <label>Buyer Type</label>
+      <select id="buyerType">
+        <option value="">Select buyer type</option>
+        <option value="individual">Individual</option>
+        <option value="company">Company / Corporate Body</option>
+        <option value="firsttime">First-Time Buyer (Individual)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Does the buyer own other properties?</label>
+      <select id="ownsOther">
+        <option value="">Select an option</option>
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Buyer Name
+        <span class="tooltip-wrap">
+          <span class="tooltip-icon">i</span>
+          <div class="tooltip-box">
+            <strong>Connected Parties Warning</strong><br/>
+            If the buyer name matches or resembles the firm name, Revenue Scotland may treat the parties as connected. This can affect ADS liability and LBTT grouping rules under LBTT(S)A 2013 s.40.
+          </div>
+        </span>
+      </label>
+      <input type="text" id="buyerName" placeholder="e.g. Acme Properties Ltd"/>
+    </div>
+
+    <div class="form-group">
+      <label>Solicitor / Firm Name</label>
+      <input type="text" id="firmName" placeholder="e.g. Brodies LLP"/>
+    </div>
+
+    <div class="form-group">
+      <label>Solicitor Name</label>
+      <input type="text" id="solicitorName" placeholder="e.g. Michael Smith"/>
+    </div>
+
+    <div class="warning-box" id="connectedWarning">
+      <strong>⚠ Connected Parties Detected</strong><br/>
+      The buyer name appears to match or resemble the acting firm. Revenue Scotland may treat these parties as connected under LBTT(S)A 2013 s.40, which could affect ADS liability and LBTT grouping rules. Please verify this transaction with a qualified tax adviser before proceeding.
+    </div>
+
+    <div class="error" id="errorMsg">Please fill in all fields correctly.</div>
+
+    <button class="btn" onclick="calculate()">Calculate LBTT Liability</button>
+
+    <div class="result" id="result">
+      <div class="result-title">Certificate of Tax Position</div>
+
+      <div class="result-row">
+        <span class="label">Section 59 Applied</span>
+        <span class="value" id="s59"></span>
+      </div>
+      <div class="result-row" id="mdrRow" style="display:none">
+        <span class="label">MDR Applied</span>
+        <span class="value" id="mdrStatus"></span>
+      </div>
+      <div class="result-row">
+        <span class="label">Rate Band</span>
+        <span class="value" id="rateBand"></span>
+      </div>
+      <div class="result-row">
+        <span class="label">LBTT Liability</span>
+        <span class="value gold" id="lbttAmount"></span>
+      </div>
+      <div class="result-row">
+        <span class="label">ADS Liability</span>
+        <span class="value" id="adsAmount"></span>
+      </div>
+      <div class="result-row">
+        <span class="label">Total Tax Liability</span>
+        <span class="value gold" id="totalAmount"></span>
+      </div>
+
+      <div class="saving-box" id="savingBox" style="display:none">
+        <div class="saving-label">Tax Saving vs Residential Rate</div>
+        <div class="saving-amount" id="savingAmount"></div>
+      </div>
+
+      <div class="citation" id="citation"></div>
+
+      <button class="btn-outline" id="downloadBtn" onclick="downloadCertificate()">
+        ↓ Download Certificate of Tax Position
+      </button>
+    </div>
+  </div>
+
+  <script>
+    function formatCurrency(amount) {
+      return '£' + amount.toLocaleString('en-GB', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+    }
+
+    function calculateResidentialLBTT(price) {
+      // Standard residential rates — LBTT(S)A 2013 s.24
+      let tax = 0;
+      if (price <= 145000) return 0;
+      if (price > 145000) tax += (Math.min(price, 250000) - 145000) * 0.02;
+      if (price > 250000) tax += (Math.min(price, 325000) - 250000) * 0.05;
+      if (price > 325000) tax += (Math.min(price, 750000) - 325000) * 0.10;
+      if (price > 750000) tax += (price - 750000) * 0.12;
+      return Math.round(tax);
+    }
+
+    function calculateFirstTimeBuyerLBTT(price) {
+      // First-time buyer relief — nil rate band raised to £175,000
+      // LBTT(S)A 2013 s.29 & First-time Buyer Relief
+      // Max relief = £600 (difference between standard and FTB nil band)
+      let tax = 0;
+      if (price <= 175000) return 0; // Full relief — nil rate
+      if (price > 175000) tax += (Math.min(price, 250000) - 175000) * 0.02;
+      if (price > 250000) tax += (Math.min(price, 325000) - 250000) * 0.05;
+      if (price > 325000) tax += (Math.min(price, 750000) - 325000) * 0.10;
+      if (price > 750000) tax += (price - 750000) * 0.12;
+      return Math.round(tax);
+    }
+
+    function calculateNonResidentialLBTT(price) {
+      let tax = 0;
+      if (price <= 150000) return 0;
+      if (price > 150000) tax += (Math.min(price, 250000) - 150000) * 0.01;
+      if (price > 250000) tax += (price - 250000) * 0.05;
+      return Math.round(tax);
+    }
+
+    function calculateMDR(totalPrice, units) {
+      // Multiple Dwelling Relief — LBTT(S)A 2013 Schedule 5
+      const avgPrice = totalPrice / units;
+      const taxOnAvg = calculateResidentialLBTT(avgPrice);
+      const mdrTax = Math.round(taxOnAvg * units);
+      const standardTax = calculateResidentialLBTT(totalPrice);
+      const minimumTax = Math.round(standardTax * 0.25);
+      return Math.max(mdrTax, minimumTax);
+    }
+
+    function calculate() {
+      const units = parseInt(document.getElementById('units').value);
+      const price = parseFloat(document.getElementById('price').value);
+      const buyerType = document.getElementById('buyerType').value;
+      const ownsOther = document.getElementById('ownsOther').value;
+      const errorMsg = document.getElementById('errorMsg');
+
+      if (!units || !price || !buyerType || !ownsOther) {
+        errorMsg.style.display = 'block';
+        return;
+      }
+      errorMsg.style.display = 'none';
+
+      const section59Triggered = units >= 6;
+      const mdrApplicable = units >= 2 && units <= 5;
+      let lbttAmount = 0;
+      let adsAmount = 0;
+      let rateBand = '';
+      let citationText = '';
+      let residentialEquivalent = 0;
+      let mdrApplied = false;
+
+      if (section59Triggered) {
+        lbttAmount = calculateNonResidentialLBTT(price);
+        adsAmount = 0;
+        rateBand = 'Non-Residential';
+        citationText = `
+          <strong>Statutory Authority:</strong><br/>
+          Land and Buildings Transaction Tax (Scotland) Act 2013<br/>
+          Section 59 — Transactions involving 6 or more dwellings<br/><br/>
+          As this transaction involves ${units} dwellings acquired in a single transaction,
+          it is treated as a non-residential transaction by virtue of Section 59 of the
+          LBTT(S)A 2013. Non-residential rates apply and the Additional Dwelling
+          Supplement (ADS) does not apply.<br/><br/>
+          <strong>Revenue Scotland Reference:</strong> LBTT(S)A 2013 s.59
+        `;
+        residentialEquivalent = calculateResidentialLBTT(price);
+        if (ownsOther === 'yes') {
+          residentialEquivalent += Math.round(price * 0.08);
+        }
+      } else {
+        const isFirstTime = buyerType === 'firsttime';
+
+        if (mdrApplicable && !isFirstTime) {
+          // Multiple Dwelling Relief applies for 2-5 units
+          const mdrTax = calculateMDR(price, units);
+          const standardTax = calculateResidentialLBTT(price);
+          // Only apply MDR if it results in less tax
+          if (mdrTax < standardTax) {
+            lbttAmount = mdrTax;
+            mdrApplied = true;
+          } else {
+            lbttAmount = standardTax;
+          }
+        } else if (isFirstTime) {
+          lbttAmount = calculateFirstTimeBuyerLBTT(price);
+        } else {
+          lbttAmount = calculateResidentialLBTT(price);
+        }
+
+        // ADS — first time buyers are exempt if they don't own other properties
+        adsAmount = ownsOther === 'yes' ? Math.round(price * 0.08) : 0;
+        rateBand = mdrApplied ? 'Residential (MDR)' : 'Residential';
+
+        const ftbRelief = isFirstTime && price <= 175000 ?
+          '<br/><br/><strong>First-Time Buyer Relief Applied:</strong> Nil rate band extended to £175,000 under LBTT(S)A 2013 s.29. Maximum relief of £600.' :
+          isFirstTime && price > 175000 ?
+          '<br/><br/><strong>First-Time Buyer Relief Applied:</strong> Reduced nil rate band of £175,000 applies. Full relief not available as purchase price exceeds £175,000.' : '';
+
+        const mdrNote = mdrApplied ?
+          `<br/><br/><strong>Multiple Dwelling Relief Applied:</strong> This transaction involves ${units} dwellings. MDR has been applied under LBTT(S)A 2013 Schedule 5. Tax calculated on average price per dwelling (£${Math.round(price/units).toLocaleString('en-GB')}) and multiplied by number of dwellings, subject to minimum tax floor of 25% of standard LBTT. Revenue Scotland Reference: LBTT(S)A 2013 Sch.5` : '';
+
+        citationText = `
+          <strong>Statutory Authority:</strong><br/>
+          Land and Buildings Transaction Tax (Scotland) Act 2013<br/>
+          Section 24 — Residential property rates and bands<br/><br/>
+          ${ownsOther === 'yes' ?
+            'The Additional Dwelling Supplement (ADS) applies at 8% of the full purchase price as the buyer owns one or more existing residential properties. Authority: The Land and Buildings Transaction Tax (Additional Amount — Second Homes Main Residence Relief) (Scotland) Order 2017.' :
+            'The Additional Dwelling Supplement (ADS) does not apply as the buyer does not own other residential properties.'
+          }${ftbRelief}<br/><br/>
+          <strong>Revenue Scotland Reference:</strong> LBTT(S)A 2013 s.24
+        `;
+      }
+
+      const totalAmount = lbttAmount + adsAmount;
+      const saving = residentialEquivalent - totalAmount;
+
+      document.getElementById('s59').innerHTML = section59Triggered ?
+        '<span class="section-tag">YES — Section 59 Triggered</span>' :
+        '<span style="color:rgba(242,237,228,0.5)">Not applicable</span>';
+
+      document.getElementById('rateBand').textContent = rateBand;
+
+      // MDR row
+      if (mdrApplied) {
+        document.getElementById('mdrRow').style.display = 'flex';
+        document.getElementById('mdrStatus').innerHTML = '<span class="section-tag">YES — Schedule 5 Applied</span>';
+      } else {
+        document.getElementById('mdrRow').style.display = 'none';
+      }
+      document.getElementById('lbttAmount').textContent = formatCurrency(lbttAmount);
+
+      const adsEl = document.getElementById('adsAmount');
+      adsEl.textContent = formatCurrency(adsAmount);
+      adsEl.className = 'value ' + (adsAmount === 0 ? 'green' : 'red');
+
+      document.getElementById('totalAmount').textContent = formatCurrency(totalAmount);
+      document.getElementById('citation').innerHTML = citationText;
+
+      if (section59Triggered && saving > 0) {
+        document.getElementById('savingBox').style.display = 'block';
+        document.getElementById('savingAmount').textContent = formatCurrency(saving) + ' saved';
+      } else {
+        document.getElementById('savingBox').style.display = 'none';
+      }
+
+      document.getElementById('result').style.display = 'block';
+
+      // Connected parties check
+      const buyerNameVal = document.getElementById('buyerName').value.toLowerCase().trim();
+      const firmNameVal = document.getElementById('firmName').value.toLowerCase().trim();
+      const warning = document.getElementById('connectedWarning');
+
+      if (buyerNameVal && firmNameVal && buyerNameVal.length > 2 && firmNameVal.length > 2) {
+        const buyerWords = buyerNameVal.split(' ').filter(w => w.length > 3);
+        const firmWords = firmNameVal.split(' ').filter(w => w.length > 3);
+        const hasMatch = buyerWords.some(word => firmWords.includes(word));
+        warning.style.display = hasMatch ? 'block' : 'none';
+      } else {
+        warning.style.display = 'none';
+      }
+      document.getElementById('downloadBtn').style.display = 'block';
+    }
+
+    function downloadCertificate() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const price = parseFloat(document.getElementById('price').value);
+      const units = parseInt(document.getElementById('units').value);
+      const section59 = units >= 6;
+      const lbtt = document.getElementById('lbttAmount').textContent;
+      const ads = document.getElementById('adsAmount').textContent;
+      const total = document.getElementById('totalAmount').textContent;
+      const rateBand = document.getElementById('rateBand').textContent;
+  const mdrAppliedPDF = rateBand.includes('MDR');
+      const buyerName = document.getElementById('buyerName').value || 'Not specified';
+      const firmName = document.getElementById('firmName').value || 'Not specified';
+      const solicitorName = document.getElementById('solicitorName').value || 'Not specified';
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      const timeStr = now.toLocaleTimeString('en-GB');
+      const refNum = 'STA-' + now.getFullYear() + '-' +
+        String(now.getMonth()+1).padStart(2,'0') +
+        String(now.getDate()).padStart(2,'0') + '-' +
+        Math.random().toString(36).substr(2,6).toUpperCase();
+
+      // Dark background
+      doc.setFillColor(10, 22, 40);
+      doc.rect(0, 0, 210, 297, 'F');
+
+      // Gold top border
+      doc.setDrawColor(201, 168, 76);
+      doc.setLineWidth(1);
+      doc.line(0, 12, 210, 12);
+
+      // Logo
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(24);
+      doc.setFont('helvetica', 'bold');
+      doc.text('STATUTE', 20, 30);
+
+      doc.setTextColor(201, 168, 76);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text('REGULATORY INTELLIGENCE FOR UK PROPERTY', 20, 38);
+
+      // Right header
+      doc.setTextColor(201, 168, 76);
+      doc.setFontSize(8);
+      doc.text('CERTIFICATE OF TAX POSITION', 210, 26, { align: 'right' });
+      doc.setTextColor(150, 130, 90);
+      doc.text('Reference: ' + refNum, 210, 32, { align: 'right' });
+      doc.text('Issued: ' + dateStr, 210, 38, { align: 'right' });
+
+      // Divider
+      doc.setDrawColor(201, 168, 76);
+      doc.setLineWidth(0.3);
+      doc.line(20, 44, 190, 44);
+
+      // Certificate title
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('LBTT TAX POSITION CERTIFICATE', 20, 56);
+
+      doc.setTextColor(150, 130, 90);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Land and Buildings Transaction Tax (Scotland) Act 2013', 20, 63);
+
+      // PARTIES BOX
+      doc.setFillColor(15, 30, 53);
+      doc.setDrawColor(201, 168, 76);
+      doc.setLineWidth(0.3);
+      doc.rect(20, 70, 170, 48, 'FD');
+
+      doc.setTextColor(201, 168, 76);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text('PARTIES TO THE TRANSACTION', 28, 79);
+
+      doc.setDrawColor(201, 168, 76);
+      doc.setLineWidth(0.2);
+      doc.line(28, 81, 182, 81);
+
+      doc.setTextColor(150, 130, 90);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Buyer / Purchaser:', 28, 90);
+      doc.text('Acting Firm:', 28, 100);
+      doc.text('Solicitor:', 28, 110);
+
+      doc.setTextColor(255, 255, 255);
+      doc.text(buyerName, 90, 90);
+      doc.text(firmName, 90, 100);
+      doc.text(solicitorName, 90, 110);
+
+      // TRANSACTION DETAILS BOX
+      doc.setFillColor(15, 30, 53);
+      doc.setDrawColor(201, 168, 76);
+      doc.setLineWidth(0.3);
+      doc.rect(20, 126, 170, 48, 'FD');
+
+      doc.setTextColor(201, 168, 76);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text('TRANSACTION DETAILS', 28, 135);
+
+      doc.setDrawColor(201, 168, 76);
+      doc.setLineWidth(0.2);
+      doc.line(28, 137, 182, 137);
+
+      doc.setTextColor(150, 130, 90);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Number of Units:', 28, 146);
+      doc.text('Purchase Price:', 28, 155);
+      doc.text('Rate Classification:', 28, 164);
+      doc.text('Section 59 Applied:', 28, 173);
+
+      doc.setTextColor(255, 255, 255);
+      doc.text(units.toString(), 120, 146);
+      doc.text('£' + price.toLocaleString('en-GB'), 120, 155);
+      doc.text(rateBand, 120, 164);
+      doc.text(section59 ? 'YES — s.59 LBTT(S)A 2013' : 'NO', 120, 173);
+
+      // TAX CALCULATION BOX
+      doc.setFillColor(15, 30, 53);
+      doc.setDrawColor(201, 168, 76);
+      doc.setLineWidth(0.3);
+      doc.rect(20, 182, 170, 55, 'FD');
+
+      doc.setTextColor(201, 168, 76);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text('TAX CALCULATION', 28, 191);
+
+      doc.setDrawColor(201, 168, 76);
+      doc.setLineWidth(0.2);
+      doc.line(28, 193, 182, 193);
+
+      doc.setTextColor(150, 130, 90);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text('LBTT Liability:', 28, 202);
+      doc.text('ADS Liability:', 28, 212);
+
+      doc.setDrawColor(100, 90, 60);
+      doc.setLineWidth(0.2);
+      doc.line(28, 218, 182, 218);
+      doc.text('TOTAL TAX LIABILITY:', 28, 228);
+
+      doc.setTextColor(201, 168, 76);
+      doc.setFontSize(9);
+      doc.text(lbtt, 182, 202, { align: 'right' });
+
+      doc.setTextColor(92, 184, 138);
+      doc.text(ads, 182, 212, { align: 'right' });
+
+      doc.setTextColor(201, 168, 76);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(total, 182, 228, { align: 'right' });
+
+      // STATUTORY AUTHORITY BOX
+      doc.setFillColor(15, 30, 53);
+      doc.setDrawColor(60, 50, 20);
+      doc.setLineWidth(0.3);
+      doc.rect(20, 245, 170, 42, 'FD');
+
+      doc.setFillColor(201, 168, 76);
+      doc.rect(20, 245, 3, 42, 'F');
+
+      doc.setTextColor(201, 168, 76);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text('STATUTORY AUTHORITY', 30, 254);
+
+      doc.setTextColor(200, 190, 170);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Land and Buildings Transaction Tax (Scotland) Act 2013', 30, 262);
+
+      if (section59) {
+        doc.text('Section 59 — Transactions involving 6 or more dwellings', 30, 269);
+        doc.text('Non-residential rates applied. ADS not applicable.', 30, 276);
+        doc.text('Revenue Scotland Reference: LBTT(S)A 2013 s.59', 30, 283);
+      } else {
+        doc.text('Section 24 — Residential property rates and bands', 30, 269);
+        doc.text('Residential rates applied.', 30, 276);
+        doc.text('Revenue Scotland Reference: LBTT(S)A 2013 s.24', 30, 283);
+      }
+
+      // AUDIT FOOTER
+      doc.setFillColor(10, 22, 40);
+      doc.setDrawColor(40, 35, 15);
+      doc.setLineWidth(0.2);
+      doc.rect(20, 274, 170, 14, 'FD');
+
+      doc.setTextColor(100, 90, 60);
+      doc.setFontSize(7);
+      doc.text('AUDIT RECORD — Generated by Statute on ' + dateStr + ' at ' + timeStr + ' UTC', 105, 280, { align: 'center' });
+      doc.text('Reference: ' + refNum + ' | statutehq.com', 105, 285, { align: 'center' });
+
+      // Gold bottom border
+      doc.setDrawColor(201, 168, 76);
+      doc.setLineWidth(0.5);
+      doc.line(0, 293, 210, 293);
+
+      doc.save('Statute-Certificate-' + refNum + '.pdf');
+
+      // Log to admin dashboard
+      const lbttNum = parseInt(document.getElementById('lbttAmount').textContent.replace(/[£,]/g, ''));
+      const adsNum = parseInt(document.getElementById('adsAmount').textContent.replace(/[£,]/g, ''));
+      const totalNum = parseInt(document.getElementById('totalAmount').textContent.replace(/[£,]/g, ''));
+      const savingEl = document.getElementById('savingAmount');
+      const savingNum = savingEl ? parseInt((savingEl.textContent || '0').replace(/[^0-9]/g, '')) || 0 : 0;
+      const existing = JSON.parse(localStorage.getItem('statute_certificates') || '[]');
+      existing.push({
+        ref: refNum,
+        date: dateStr + ' ' + timeStr,
+        units: units,
+        price: price,
+        section59: section59,
+        lbtt: lbttNum,
+        ads: adsNum,
+        total: totalNum,
+        saving: savingNum
+      });
+      localStorage.setItem('statute_certificates', JSON.stringify(existing));
+    }
+  </script>
+</body>
+</html>
