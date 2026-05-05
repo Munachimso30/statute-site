@@ -210,6 +210,105 @@
       display: none;
     }
 
+    /* ACCESS GATE MODAL */
+    .gate-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10,22,40,0.92);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .gate-overlay.active { display: flex; }
+    .gate-box {
+      background: #0f1e35;
+      border: 1px solid rgba(201,168,76,0.35);
+      padding: 48px 44px;
+      max-width: 460px;
+      width: 100%;
+    }
+    .gate-logo {
+      font-size: 18px;
+      letter-spacing: 0.3em;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .gate-logo span { color: #c9a84c; }
+    .gate-tag {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(201,168,76,0.5);
+      margin-bottom: 28px;
+    }
+    .gate-title {
+      font-size: 20px;
+      color: #fff;
+      margin-bottom: 10px;
+      letter-spacing: 0.02em;
+    }
+    .gate-sub {
+      font-size: 13px;
+      color: rgba(242,237,228,0.5);
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+    .gate-field {
+      margin-bottom: 16px;
+    }
+    .gate-field label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(201,168,76,0.7);
+      margin-bottom: 8px;
+    }
+    .gate-field input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(201,168,76,0.2);
+      color: #f2ede4;
+      font-family: 'Georgia', serif;
+      font-size: 15px;
+      padding: 13px 16px;
+      outline: none;
+    }
+    .gate-field input:focus { border-color: rgba(201,168,76,0.5); }
+    .gate-btn {
+      width: 100%;
+      background: #c9a84c;
+      color: #0a1628;
+      border: none;
+      font-family: 'Georgia', serif;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 17px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.3s;
+    }
+    .gate-btn:hover { background: #e2c27a; }
+    .gate-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .gate-note {
+      font-size: 11px;
+      color: rgba(242,237,228,0.3);
+      text-align: center;
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+    .gate-error {
+      font-size: 12px;
+      color: #e07070;
+      margin-top: 10px;
+      display: none;
+    }
+
     /* PROPERTY TYPE DESCRIPTION PANEL */
     .prop-desc {
       display: none;
@@ -469,7 +568,7 @@
 
     <div class="error" id="errorMsg">Please fill in all fields correctly.</div>
 
-    <button class="btn" onclick="calculate()">Calculate LBTT Liability</button>
+    <button class="btn" onclick="checkGate()">Calculate LBTT Liability</button>
 
     <div class="result" id="result">
       <div class="result-title">Certificate of Tax Position</div>
@@ -806,7 +905,66 @@
       checkConnectedParties();
     }
 
-    // ── Main calculate function ───────────────────────────────────
+    // ── Access Gate ───────────────────────────────────────────────
+
+    function checkGate() {
+      // Check if access already granted this session
+      if (sessionStorage.getItem('statute_access') === 'granted') {
+        calculate();
+      } else {
+        document.getElementById('gateOverlay').classList.add('active');
+        document.getElementById('gateName').focus();
+      }
+    }
+
+    function submitGate() {
+      const name = document.getElementById('gateName').value.trim();
+      const email = document.getElementById('gateEmail').value.trim();
+      const firm = document.getElementById('gateFirm').value.trim();
+      const errEl = document.getElementById('gateError');
+      const btn = document.getElementById('gateBtn');
+
+      if (!name || !email || !email.includes('@') || !firm) {
+        errEl.style.display = 'block';
+        return;
+      }
+      errEl.style.display = 'none';
+
+      btn.disabled = true;
+      btn.textContent = 'Granting Access...';
+
+      // Send lead to Formspree (fire and forget — don't block UX)
+      fetch('https://formspree.io/f/xjglwkbo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          email,
+          firm,
+          source: 'Statute Calculator Gate — statutehq.com/calculator'
+        })
+      }).catch(() => {}); // Silently handle any network error
+
+      // Grant access immediately
+      sessionStorage.setItem('statute_access', 'granted');
+      document.getElementById('gateOverlay').classList.remove('active');
+      btn.disabled = false;
+      btn.textContent = 'Access the Engine →';
+
+      // Pre-fill buyer name if left blank
+      const buyerNameField = document.getElementById('buyerName');
+      if (!buyerNameField.value) buyerNameField.value = firm;
+
+      // Now run the calculation
+      calculate();
+    }
+
+    // Allow Enter key to submit gate
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && document.getElementById('gateOverlay').classList.contains('active')) {
+        submitGate();
+      }
+    });
 
     function calculate() {
       const propertyType = document.getElementById('propertyType').value;
@@ -1461,5 +1619,32 @@
       });
     }
   </script>
+  <!-- ACCESS GATE MODAL -->
+  <div class="gate-overlay" id="gateOverlay">
+    <div class="gate-box">
+      <div class="gate-logo">STAT<span>U</span>TE</div>
+      <div class="gate-tag">LBTT Compliance Engine · Scotland</div>
+      <div class="gate-title">Request Early Access</div>
+      <div class="gate-sub">Statute is currently in early access for Scottish law firms and property investors. Register to use the engine and generate your Certificate of Tax Position.</div>
+
+      <div class="gate-field">
+        <label>Full Name</label>
+        <input type="text" id="gateName" placeholder="e.g. Michael Smith"/>
+      </div>
+      <div class="gate-field">
+        <label>Email Address</label>
+        <input type="email" id="gateEmail" placeholder="e.g. michael@brodies.com"/>
+      </div>
+      <div class="gate-field">
+        <label>Firm / Organisation</label>
+        <input type="text" id="gateFirm" placeholder="e.g. Brodies LLP"/>
+      </div>
+
+      <button class="gate-btn" id="gateBtn" onclick="submitGate()">Access the Engine →</button>
+      <div class="gate-error" id="gateError">Please fill in all fields correctly.</div>
+      <div class="gate-note">Your details are used only to notify you of Statute updates and early access pricing. We do not share your information.</div>
+    </div>
+  </div>
+
 </body>
 </html>
