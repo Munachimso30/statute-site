@@ -785,146 +785,166 @@
       doc.text(rateBand, 120, 164);
       doc.text(section59 ? 'YES — s.59 LBTT(S)A 2013' : 'NO', 120, 173);
 
-      // Compute MDR workings if applicable
-      let mdrWorkings = null;
+      // Compute MDR workings
+      let mdrW = null;
       if (mdrAppliedPDF) {
-        const rates = [0, 0.02, 0.05, 0.10, 0.12];
         const limits = [145000, 250000, 325000, 750000, Infinity];
-        const calcLBTT = (amount) => {
-          let tax = 0, remaining = amount, prev = 0;
+        const rates = [0, 0.02, 0.05, 0.10, 0.12];
+        const calcLBTT = (amt) => {
+          let tax = 0, rem = amt, prev = 0;
           for (let i = 0; i < rates.length; i++) {
-            const taxable = Math.min(remaining, limits[i] - prev);
-            tax += taxable * rates[i];
-            remaining -= taxable;
-            prev = limits[i];
-            if (remaining <= 0) break;
+            const t = Math.min(rem, limits[i] - prev);
+            tax += t * rates[i]; rem -= t; prev = limits[i];
+            if (rem <= 0) break;
           }
           return Math.round(tax);
         };
-        const avgPerDwelling = Math.round(price / units);
-        const lbttOnAvg = calcLBTT(avgPerDwelling);
-        const mdrRawTotal = lbttOnAvg * units;
-        const standardLBTT = calcLBTT(price);
-        const floor = Math.round(standardLBTT * 0.25);
-        const floorApplied = floor > mdrRawTotal;
-        mdrWorkings = { avgPerDwelling, lbttOnAvg, mdrRawTotal, standardLBTT, floor, floorApplied };
+        const avg = Math.round(price / units);
+        const lbttOnAvg = calcLBTT(avg);
+        const mdrRaw = lbttOnAvg * units;
+        const stdLBTT = calcLBTT(price);
+        const floor = Math.round(stdLBTT * 0.25);
+        mdrW = { avg, lbttOnAvg, mdrRaw, stdLBTT, floor, floorApplied: floor > mdrRaw };
       }
 
       const fmt = (n) => '£' + Math.round(n).toLocaleString('en-GB');
+      const VAL_X = 182; // right-align all values here
+      const LBL_X = 28;  // left-align all labels here
 
-      // TAX CALCULATION BOX — taller for MDR to show workings
-      const taxBoxH = mdrAppliedPDF ? 92 : 55;
+      // TAX CALCULATION BOX
+      const taxH = mdrAppliedPDF ? 96 : 55;
       doc.setFillColor(15, 30, 53);
       doc.setDrawColor(201, 168, 76);
       doc.setLineWidth(0.3);
-      doc.rect(20, 182, 170, taxBoxH, 'FD');
+      doc.rect(20, 182, 170, taxH, 'FD');
 
       doc.setTextColor(201, 168, 76);
       doc.setFontSize(8);
       doc.setFont('helvetica', 'bold');
-      doc.text('TAX CALCULATION', 28, 191);
-
+      doc.text('TAX CALCULATION', LBL_X, 191);
       doc.setDrawColor(201, 168, 76);
       doc.setLineWidth(0.2);
-      doc.line(28, 193, 182, 193);
+      doc.line(LBL_X, 193, VAL_X, 193);
 
-      if (mdrAppliedPDF && mdrWorkings) {
-        // MDR workings breakdown
+      if (mdrAppliedPDF && mdrW) {
+        // Workings sub-header
         doc.setTextColor(201, 168, 76);
         doc.setFontSize(7);
         doc.setFont('helvetica', 'bold');
-        doc.text('MDR WORKINGS — LBTT(S)A 2013 Schedule 5', 28, 201);
+        doc.text('MDR WORKINGS  —  LBTT(S)A 2013 Schedule 5', LBL_X, 200);
 
-        doc.setTextColor(150, 130, 90);
-        doc.setFontSize(8);
+        // Two-column workings table
+        const rows = [
+          ['Average price per dwelling  (' + fmt(price) + ' / ' + units + ')', fmt(mdrW.avg)],
+          ['LBTT on ' + fmt(mdrW.avg) + ' per dwelling', fmt(mdrW.lbttOnAvg) + ' each'],
+          ['MDR subtotal  (' + fmt(mdrW.lbttOnAvg) + ' x ' + units + ' dwellings)', fmt(mdrW.mdrRaw)],
+          ['Standard LBTT on full price  (floor basis)', fmt(mdrW.stdLBTT)],
+          ['25% statutory minimum floor', fmt(mdrW.floor)],
+        ];
+
         doc.setFont('helvetica', 'normal');
-        doc.text('Purchase price (' + fmt(price) + ') ÷ ' + units + ' dwellings =', 28, 210);
-        doc.text(fmt(mdrWorkings.avgPerDwelling) + ' avg per dwelling', 182, 210, { align: 'right' });
+        doc.setFontSize(7.5);
+        let ry = 208;
+        rows.forEach((row, i) => {
+          const isFloorRow = i === 4;
+          doc.setTextColor(isFloorRow ? 201 : 150, isFloorRow ? 168 : 130, isFloorRow ? 76 : 90);
+          doc.text(row[0], LBL_X, ry);
+          doc.text(row[1], VAL_X, ry, { align: 'right' });
+          ry += 8;
+        });
 
-        doc.text('LBTT on ' + fmt(mdrWorkings.avgPerDwelling) + ' × ' + units + ' dwellings =', 28, 219);
-        doc.text(fmt(mdrWorkings.mdrRawTotal) + ' (MDR subtotal)', 182, 219, { align: 'right' });
+        // Floor applied badge
+        if (mdrW.floorApplied) {
+          doc.setTextColor(201, 168, 76);
+          doc.setFontSize(6.5);
+          doc.setFont('helvetica', 'bold');
+          doc.text('[ FLOOR APPLIES — s.Sch.5 para.5(3) ]', LBL_X + 4, ry - 2);
+        }
 
-        doc.text('Standard LBTT on ' + fmt(price) + ' (floor basis) =', 28, 228);
-        doc.text(fmt(mdrWorkings.standardLBTT), 182, 228, { align: 'right' });
-
-        doc.text('25% minimum floor =', 28, 237);
-        doc.setTextColor(mdrWorkings.floorApplied ? 201 : 92, mdrWorkings.floorApplied ? 168 : 184, mdrWorkings.floorApplied ? 76 : 138);
-        doc.text(fmt(mdrWorkings.floor) + (mdrWorkings.floorApplied ? ' ← FLOOR APPLIED' : ' (floor not needed)'), 182, 237, { align: 'right' });
-
+        // Separator before totals
         doc.setDrawColor(100, 90, 60);
         doc.setLineWidth(0.2);
-        doc.line(28, 243, 182, 243);
+        doc.line(LBL_X, ry + 2, VAL_X, ry + 2);
+        ry += 8;
+
+        // LBTT / ADS / Total
+        doc.setTextColor(150, 130, 90);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text('LBTT Liability:', LBL_X, ry); 
+        doc.setTextColor(201, 168, 76);
+        doc.text(lbtt, VAL_X, ry, { align: 'right' });
+        ry += 9;
+
+        doc.setTextColor(150, 130, 90);
+        doc.text('ADS Liability:', LBL_X, ry);
+        doc.setTextColor(92, 184, 138);
+        doc.text(ads, VAL_X, ry, { align: 'right' });
+        ry += 5;
+
+        doc.setDrawColor(100, 90, 60);
+        doc.line(LBL_X, ry, VAL_X, ry);
+        ry += 7;
 
         doc.setTextColor(150, 130, 90);
         doc.setFontSize(9);
-        doc.text('LBTT Liability:', 28, 252);
-        doc.text('ADS Liability:', 28, 261);
-        doc.setDrawColor(100, 90, 60);
-        doc.line(28, 266, 182, 266);
-        doc.text('TOTAL TAX LIABILITY:', 28, 274);
-
-        doc.setTextColor(201, 168, 76);
-        doc.setFontSize(9);
-        doc.text(lbtt, 182, 252, { align: 'right' });
-        doc.setTextColor(92, 184, 138);
-        doc.text(ads, 182, 261, { align: 'right' });
+        doc.text('TOTAL TAX LIABILITY:', LBL_X, ry);
         doc.setTextColor(201, 168, 76);
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
-        doc.text(total, 182, 274, { align: 'right' });
+        doc.text(total, VAL_X, ry, { align: 'right' });
+
       } else {
+        // Standard layout (non-MDR)
         doc.setTextColor(150, 130, 90);
         doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
-        doc.text('LBTT Liability:', 28, 202);
-        doc.text('ADS Liability:', 28, 212);
+        doc.text('LBTT Liability:', LBL_X, 202);
+        doc.text('ADS Liability:', LBL_X, 212);
         doc.setDrawColor(100, 90, 60);
-        doc.setLineWidth(0.2);
-        doc.line(28, 218, 182, 218);
-        doc.text('TOTAL TAX LIABILITY:', 28, 228);
-
+        doc.line(LBL_X, 218, VAL_X, 218);
+        doc.text('TOTAL TAX LIABILITY:', LBL_X, 228);
         doc.setTextColor(201, 168, 76);
         doc.setFontSize(9);
-        doc.text(lbtt, 182, 202, { align: 'right' });
+        doc.text(lbtt, VAL_X, 202, { align: 'right' });
         doc.setTextColor(92, 184, 138);
-        doc.text(ads, 182, 212, { align: 'right' });
+        doc.text(ads, VAL_X, 212, { align: 'right' });
         doc.setTextColor(201, 168, 76);
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
-        doc.text(total, 182, 228, { align: 'right' });
+        doc.text(total, VAL_X, 228, { align: 'right' });
       }
 
-      // STATUTORY AUTHORITY BOX — positioned after tax box
-      const statY = 182 + taxBoxH + 6;
-      const statH = mdrAppliedPDF ? 22 : 42;
+      // STATUTORY AUTHORITY BOX
+      const statY = 182 + taxH + 5;
+      const statH = mdrAppliedPDF ? 18 : 42;
       doc.setFillColor(15, 30, 53);
       doc.setDrawColor(60, 50, 20);
       doc.setLineWidth(0.3);
       doc.rect(20, statY, 170, statH, 'FD');
-
       doc.setFillColor(201, 168, 76);
       doc.rect(20, statY, 3, statH, 'F');
 
       doc.setTextColor(201, 168, 76);
       doc.setFontSize(8);
       doc.setFont('helvetica', 'bold');
-      doc.text('STATUTORY AUTHORITY', 30, statY + 9);
+      doc.text('STATUTORY AUTHORITY', 30, statY + 8);
 
       doc.setTextColor(200, 190, 170);
-      doc.setFontSize(8);
+      doc.setFontSize(7.5);
       doc.setFont('helvetica', 'normal');
-      doc.text('Land and Buildings Transaction Tax (Scotland) Act 2013', 30, statY + 17);
+      doc.text('Land and Buildings Transaction Tax (Scotland) Act 2013', 30, statY + 15);
 
       if (section59) {
-        doc.text('Section 59 — Transactions involving 6 or more dwellings', 30, statY + 25);
-        doc.text('Non-residential rates applied. ADS not applicable.', 30, statY + 32);
-        doc.text('Revenue Scotland Reference: LBTT(S)A 2013 s.59', 30, statY + 39);
+        doc.text('Section 59 — 6+ dwellings treated as non-residential. ADS not applicable.', 30, statY + 22);
+        doc.text('Revenue Scotland Reference: LBTT(S)A 2013 s.59', 30, statY + 29);
+        doc.text('Rates applied per s.25 LBTT(S)A 2013.', 30, statY + 36);
       } else if (mdrAppliedPDF) {
-        doc.text('Schedule 5 — Multiple Dwellings Relief  |  Revenue Scotland Reference: LBTT(S)A 2013 Sch.5', 30, statY + 17);
+        doc.text('Schedule 5 — Multiple Dwellings Relief applied.', 30, statY + 22);
       } else {
-        doc.text('Section 24 — Residential property rates and bands', 30, statY + 25);
-        doc.text('Residential rates applied.', 30, statY + 32);
-        doc.text('Revenue Scotland Reference: LBTT(S)A 2013 s.24', 30, statY + 39);
+        doc.text('Section 24 — Residential property rates and bands applied.', 30, statY + 22);
+        doc.text('Revenue Scotland Reference: LBTT(S)A 2013 s.24', 30, statY + 29);
+        doc.text('Residential rates applied.', 30, statY + 36);
       }
 
       // AUDIT FOOTER
@@ -933,11 +953,10 @@
       doc.setDrawColor(40, 35, 15);
       doc.setLineWidth(0.2);
       doc.rect(20, auditY, 170, 14, 'FD');
-
       doc.setTextColor(100, 90, 60);
       doc.setFontSize(7);
-      doc.text('AUDIT RECORD — Generated by Statute on ' + dateStr + ' at ' + timeStr + ' UTC', 105, auditY + 6, { align: 'center' });
-      doc.text('Reference: ' + refNum + ' | statutehq.com', 105, auditY + 11, { align: 'center' });
+      doc.text('AUDIT RECORD — Generated by Statute on ' + dateStr + ' at ' + timeStr + ' UTC', 105, auditY + 5.5, { align: 'center' });
+      doc.text('Reference: ' + refNum + '  |  statutehq.com', 105, auditY + 11, { align: 'center' });
 
       // Gold bottom border
       doc.setDrawColor(201, 168, 76);
