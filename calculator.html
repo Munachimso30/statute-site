@@ -465,7 +465,6 @@
       let citationText = '';
       let residentialEquivalent = 0;
       let mdrApplied = false;
-      let mdrConsidered = false;
 
       if (isMixedOrCommercial) {
         // Mixed use or commercial — non-residential rates, no ADS
@@ -512,7 +511,6 @@
             mdrApplied = true;
           } else {
             lbttAmount = standardTax;
-            mdrConsidered = true;
           }
         } else if (isFirstTime) {
           lbttAmount = calculateFirstTimeBuyerLBTT(price);
@@ -536,9 +534,7 @@
           '<br/><br/><strong>First-Time Buyer Relief Applied:</strong> Reduced nil rate band of £175,000 applies. Full relief not available as purchase price exceeds £175,000.' : '';
 
         const mdrNote = mdrApplied ?
-          `<br/><br/><strong>Multiple Dwelling Relief Applied:</strong> This transaction involves ${units} dwellings. MDR has been applied under LBTT(S)A 2013 Schedule 5. Tax calculated on average price per dwelling (£${Math.round(price/units).toLocaleString('en-GB')}) and multiplied by number of dwellings, subject to minimum tax floor of 25% of standard LBTT. Revenue Scotland Reference: LBTT(S)A 2013 Sch.5` :
-          mdrConsidered ?
-          `<br/><br/><strong>MDR Evaluated — Not Applied:</strong> Multiple Dwelling Relief was assessed for this ${units}-unit transaction under LBTT(S)A 2013 Schedule 5. Standard residential rates produce a lower liability. MDR not claimed. Revenue Scotland Reference: LBTT(S)A 2013 Sch.5` : '';
+          `<br/><br/><strong>Multiple Dwelling Relief Applied:</strong> This transaction involves ${units} dwellings. MDR has been applied under LBTT(S)A 2013 Schedule 5. Tax calculated on average price per dwelling (£${Math.round(price/units).toLocaleString('en-GB')}) and multiplied by number of dwellings, subject to minimum tax floor of 25% of standard LBTT. Revenue Scotland Reference: LBTT(S)A 2013 Sch.5` : '';
 
         citationText = `
           <strong>Statutory Authority:</strong><br/>
@@ -548,7 +544,7 @@
             'The Additional Dwelling Supplement (ADS) applies at 8% of the full purchase price as the buyer owns one or more existing residential properties. Authority: The Land and Buildings Transaction Tax (Additional Amount — Second Homes Main Residence Relief) (Scotland) Order 2017.' :
             'The Additional Dwelling Supplement (ADS) does not apply as the buyer does not own other residential properties.'
           }${ftbRelief}<br/><br/>
-          <strong>Revenue Scotland Reference:</strong> LBTT(S)A 2013 s.24
+          <strong>Revenue Scotland Reference:</strong> LBTT(S)A 2013 s.24${mdrNote}
         `;
       }
 
