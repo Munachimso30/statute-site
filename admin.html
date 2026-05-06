@@ -5,252 +5,104 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Statute — Admin Dashboard</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='50' ry='50' fill='%230a1628'/><text x='50' y='72' font-size='75' text-anchor='middle' fill='white' font-family='Georgia, serif'>S</text></svg>"/>
-  <text y='.9em' font-size='80' x='10' fill='white' font-family='serif'>S</text></svg>"/>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Georgia', serif;
-      background: #0a1628;
-      color: #f2ede4;
-      min-height: 100vh;
-      padding: 0;
-    }
+    body { font-family: 'Georgia', serif; background: #0a1628; color: #f2ede4; min-height: 100vh; }
 
-    /* LOGIN SCREEN */
-    .login-screen {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
-    }
-    .login-box {
-      background: #0f1e35;
-      border: 1px solid rgba(201,168,76,0.3);
-      padding: 48px;
-      max-width: 400px;
-      width: 100%;
-      text-align: center;
-    }
-    .login-logo {
-      font-size: 24px;
-      letter-spacing: 0.3em;
-      color: #ffffff;
-      margin-bottom: 8px;
-    }
+    /* LOGIN */
+    .login-screen { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 40px 20px; background: #0a1628; }
+    .login-box { background: #0f1e35; border: 1px solid rgba(201,168,76,0.3); padding: 48px; max-width: 400px; width: 100%; text-align: center; }
+    .login-logo { font-size: 24px; letter-spacing: 0.3em; color: #fff; margin-bottom: 8px; }
     .login-logo span { color: #c9a84c; }
-    .login-tag {
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      color: rgba(201,168,76,0.5);
-      text-transform: uppercase;
-      margin-bottom: 40px;
-    }
-    .login-input {
-      width: 100%;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(201,168,76,0.2);
-      color: #f2ede4;
-      font-family: 'Georgia', serif;
-      font-size: 16px;
-      padding: 14px 16px;
-      outline: none;
-      margin-bottom: 16px;
-      text-align: center;
-      letter-spacing: 0.2em;
-    }
-    .login-btn {
-      width: 100%;
-      background: #c9a84c;
-      color: #0a1628;
-      border: none;
-      font-family: 'Georgia', serif;
-      font-size: 12px;
-      font-weight: bold;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      padding: 16px;
-      cursor: pointer;
-    }
+    .login-tag { font-size: 10px; letter-spacing: 0.2em; color: rgba(201,168,76,0.5); text-transform: uppercase; margin-bottom: 40px; }
+    .login-input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(201,168,76,0.2); color: #f2ede4; font-family: 'Georgia', serif; font-size: 16px; padding: 14px 16px; outline: none; margin-bottom: 16px; text-align: center; letter-spacing: 0.2em; }
+    .login-btn { width: 100%; background: #c9a84c; color: #0a1628; border: none; font-family: 'Georgia', serif; font-size: 12px; font-weight: bold; letter-spacing: 0.2em; text-transform: uppercase; padding: 16px; cursor: pointer; }
     .login-btn:hover { background: #e2c27a; }
-    .login-error {
-      color: #e07070;
-      font-size: 12px;
-      margin-top: 12px;
-      display: none;
-    }
+    .login-error { color: #e07070; font-size: 12px; margin-top: 12px; display: none; }
 
     /* DASHBOARD */
     .dashboard { display: none; }
 
-    /* TOP NAV */
-    .dash-nav {
-      background: #0f1e35;
-      border-bottom: 1px solid rgba(201,168,76,0.2);
-      padding: 20px 40px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .dash-logo {
-      font-size: 18px;
-      letter-spacing: 0.3em;
-      color: #ffffff;
-    }
+    /* NAV */
+    .dash-nav { background: #0f1e35; border-bottom: 1px solid rgba(201,168,76,0.2); padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; }
+    .dash-logo { font-size: 18px; letter-spacing: 0.3em; color: #fff; }
     .dash-logo span { color: #c9a84c; }
-    .dash-nav-right {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-    }
-    .dash-tag {
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: rgba(201,168,76,0.5);
-    }
-    .logout-btn {
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: rgba(242,237,228,0.4);
-      cursor: pointer;
-      border: 1px solid rgba(242,237,228,0.1);
-      padding: 6px 14px;
-      background: transparent;
-      font-family: 'Georgia', serif;
-    }
+    .dash-nav-right { display: flex; align-items: center; gap: 24px; }
+    .dash-tag { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(201,168,76,0.5); }
+    .logout-btn { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(242,237,228,0.4); cursor: pointer; border: 1px solid rgba(242,237,228,0.1); padding: 6px 14px; background: transparent; font-family: 'Georgia', serif; }
     .logout-btn:hover { color: #f2ede4; }
 
-    /* MAIN CONTENT */
+    /* CONTENT */
     .dash-content { padding: 40px; }
 
-    /* STATS CARDS */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1px;
-      background: rgba(201,168,76,0.15);
-      border: 1px solid rgba(201,168,76,0.15);
-      margin-bottom: 40px;
-    }
-    .stat-card {
-      background: #0f1e35;
-      padding: 32px 28px;
-      transition: background 0.3s;
-    }
+    /* SECTION LABEL */
+    .section-label { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(201,168,76,0.5); margin-bottom: 16px; margin-top: 40px; }
+    .section-label:first-child { margin-top: 0; }
+
+    /* STATS GRID */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.15); margin-bottom: 4px; }
+    .stats-grid-2 { grid-template-columns: repeat(4, 1fr); }
+    .stat-card { background: #0f1e35; padding: 28px 24px; transition: background 0.3s; }
     .stat-card:hover { background: #162840; }
-    .stat-label {
-      font-size: 9px;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: rgba(201,168,76,0.6);
-      margin-bottom: 12px;
-    }
-    .stat-value {
-      font-size: 36px;
-      color: #ffffff;
-      line-height: 1;
-      margin-bottom: 6px;
-    }
+    .stat-label { font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(201,168,76,0.6); margin-bottom: 10px; }
+    .stat-value { font-size: 32px; color: #fff; line-height: 1; margin-bottom: 5px; }
     .stat-value.gold { color: #c9a84c; }
     .stat-value.green { color: #5cb88a; }
-    .stat-sub {
-      font-size: 11px;
-      color: rgba(242,237,228,0.35);
-    }
+    .stat-value.red { color: #e07070; }
+    .stat-value.blue { color: #7ab8e8; }
+    .stat-sub { font-size: 11px; color: rgba(242,237,228,0.35); }
+
+    /* RISK FLAGS */
+    .risk-section { background: #0f1e35; border: 1px solid rgba(224,112,112,0.2); margin-bottom: 32px; }
+    .risk-header { padding: 18px 28px; border-bottom: 1px solid rgba(224,112,112,0.15); display: flex; align-items: center; justify-content: space-between; }
+    .risk-title { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(224,112,112,0.8); }
+    .risk-count { font-size: 10px; color: rgba(224,112,112,0.5); letter-spacing: 0.1em; }
+    .risk-empty { padding: 32px 28px; font-size: 12px; color: rgba(242,237,228,0.25); }
+    .risk-item { padding: 16px 28px; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; align-items: flex-start; gap: 16px; }
+    .risk-item:last-child { border-bottom: none; }
+    .risk-icon { font-size: 14px; margin-top: 1px; flex-shrink: 0; }
+    .risk-body { flex: 1; }
+    .risk-ref { font-size: 10px; color: rgba(201,168,76,0.5); letter-spacing: 0.1em; margin-bottom: 4px; }
+    .risk-msg { font-size: 13px; color: rgba(242,237,228,0.8); line-height: 1.5; }
+    .risk-meta { font-size: 11px; color: rgba(242,237,228,0.35); margin-top: 4px; }
+    .risk-badge { display: inline-block; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 10px; border: 1px solid; margin-left: 8px; vertical-align: middle; }
+    .risk-badge.connected { color: #e07070; border-color: rgba(224,112,112,0.3); background: rgba(224,112,112,0.06); }
+    .risk-badge.high-ads { color: #c9a84c; border-color: rgba(201,168,76,0.3); background: rgba(201,168,76,0.06); }
+    .risk-badge.s59 { color: #7ab8e8; border-color: rgba(122,184,232,0.3); background: rgba(122,184,232,0.06); }
+    .risk-badge.mdr { color: #5cb88a; border-color: rgba(92,184,138,0.3); background: rgba(92,184,138,0.06); }
+    .risk-badge.relief { color: rgba(242,237,228,0.5); border-color: rgba(242,237,228,0.15); }
 
     /* TABLE */
-    .table-section {
-      background: #0f1e35;
-      border: 1px solid rgba(201,168,76,0.15);
-    }
-    .table-header {
-      padding: 20px 28px;
-      border-bottom: 1px solid rgba(201,168,76,0.15);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .table-title {
-      font-size: 10px;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: rgba(201,168,76,0.7);
-    }
-    .clear-btn {
-      font-size: 9px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: rgba(224,112,112,0.6);
-      cursor: pointer;
-      border: 1px solid rgba(224,112,112,0.2);
-      padding: 5px 12px;
-      background: transparent;
-      font-family: 'Georgia', serif;
-    }
+    .table-section { background: #0f1e35; border: 1px solid rgba(201,168,76,0.15); }
+    .table-header { padding: 18px 28px; border-bottom: 1px solid rgba(201,168,76,0.15); display: flex; align-items: center; justify-content: space-between; }
+    .table-title { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(201,168,76,0.7); }
+    .clear-btn { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(224,112,112,0.6); cursor: pointer; border: 1px solid rgba(224,112,112,0.2); padding: 5px 12px; background: transparent; font-family: 'Georgia', serif; }
     .clear-btn:hover { color: #e07070; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    thead tr {
-      background: rgba(201,168,76,0.05);
-      border-bottom: 1px solid rgba(201,168,76,0.1);
-    }
-    th {
-      font-size: 9px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: rgba(201,168,76,0.5);
-      padding: 14px 20px;
-      text-align: left;
-      font-weight: normal;
-    }
-    tbody tr {
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      transition: background 0.2s;
-    }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: rgba(201,168,76,0.05); border-bottom: 1px solid rgba(201,168,76,0.1); }
+    th { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(201,168,76,0.5); padding: 14px 16px; text-align: left; font-weight: normal; }
+    tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.2s; }
     tbody tr:hover { background: rgba(255,255,255,0.02); }
-    td {
-      padding: 16px 20px;
-      font-size: 13px;
-      color: rgba(242,237,228,0.8);
-    }
-    .badge {
-      display: inline-block;
-      font-size: 9px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 3px 10px;
-      border: 1px solid;
-    }
-    .badge-s59 { color: #c9a84c; border-color: rgba(201,168,76,0.3); background: rgba(201,168,76,0.08); }
+    td { padding: 14px 16px; font-size: 12px; color: rgba(242,237,228,0.8); }
+    .badge { display: inline-block; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border: 1px solid; }
+    .badge-s59 { color: #7ab8e8; border-color: rgba(122,184,232,0.3); background: rgba(122,184,232,0.06); }
+    .badge-mdr { color: #5cb88a; border-color: rgba(92,184,138,0.3); background: rgba(92,184,138,0.06); }
     .badge-res { color: rgba(242,237,228,0.4); border-color: rgba(242,237,228,0.1); }
+    .badge-relief { color: #c9a84c; border-color: rgba(201,168,76,0.3); background: rgba(201,168,76,0.06); }
+    .badge-commercial { color: #7ab8e8; border-color: rgba(122,184,232,0.2); }
+    .badge-warn { color: #e07070; border-color: rgba(224,112,112,0.3); background: rgba(224,112,112,0.06); }
     .amount-gold { color: #c9a84c; }
     .amount-green { color: #5cb88a; }
-    .empty-state {
-      padding: 60px 20px;
-      text-align: center;
-      color: rgba(242,237,228,0.25);
-      font-size: 13px;
-      letter-spacing: 0.1em;
-    }
+    .amount-red { color: #e07070; }
+    .empty-state { padding: 60px 20px; text-align: center; color: rgba(242,237,228,0.25); font-size: 13px; letter-spacing: 0.1em; }
 
-    /* LIVE INDICATOR */
-    .live-dot {
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      background: #5cb88a;
-      border-radius: 50%;
-      margin-right: 8px;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
+    /* TRIAL LEADS */
+    .leads-section { background: #0f1e35; border: 1px solid rgba(201,168,76,0.15); margin-bottom: 32px; }
+    .leads-note { padding: 16px 28px; font-size: 11px; color: rgba(242,237,228,0.3); line-height: 1.6; border-top: 1px solid rgba(201,168,76,0.1); }
+
+    /* LIVE DOT */
+    .live-dot { display: inline-block; width: 6px; height: 6px; background: #5cb88a; border-radius: 50%; margin-right: 8px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     @media(max-width: 768px) {
       .stats-grid { grid-template-columns: 1fr 1fr; }
@@ -268,7 +120,7 @@
     <div class="login-box">
       <div class="login-logo">STAT<span>U</span>TE</div>
       <div class="login-tag">Admin Dashboard</div>
-      <input type="password" class="login-input" id="passwordInput" placeholder="Enter password" />
+      <input type="password" class="login-input" id="passwordInput" placeholder="Enter password"/>
       <button class="login-btn" onclick="login()">Access Dashboard</button>
       <div class="login-error" id="loginError">Incorrect password. Try again.</div>
     </div>
@@ -287,22 +139,23 @@
 
     <div class="dash-content">
 
-      <!-- STATS -->
-      <div class="stats-grid">
+      <!-- STATS ROW 1 -->
+      <div class="section-label">Certificate Overview</div>
+      <div class="stats-grid" style="margin-bottom:1px;">
         <div class="stat-card">
           <div class="stat-label">Total Certificates</div>
           <div class="stat-value" id="totalCerts">0</div>
           <div class="stat-sub">Generated</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Section 59 Triggered</div>
-          <div class="stat-value gold" id="s59Count">0</div>
-          <div class="stat-sub">Transactions</div>
+          <div class="stat-label">Total Tax Liability</div>
+          <div class="stat-value gold" id="totalTax">£0</div>
+          <div class="stat-sub">Across all transactions</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Total Tax Saved</div>
           <div class="stat-value green" id="totalSaved">£0</div>
-          <div class="stat-sub">For clients</div>
+          <div class="stat-sub">Via s.59 / MDR</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Avg. Transaction</div>
@@ -311,14 +164,49 @@
         </div>
       </div>
 
-      <!-- TABLE -->
+      <!-- STATS ROW 2 -->
+      <div class="stats-grid" style="margin-bottom:40px;">
+        <div class="stat-card">
+          <div class="stat-label">Section 59 Triggered</div>
+          <div class="stat-value blue" id="s59Count">0</div>
+          <div class="stat-sub">6+ unit transactions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">MDR Applied</div>
+          <div class="stat-value green" id="mdrCount">0</div>
+          <div class="stat-sub">2–5 unit transactions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">ADS Triggered</div>
+          <div class="stat-value gold" id="adsCount">0</div>
+          <div class="stat-sub">Additional dwelling supplement</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Risk Flags</div>
+          <div class="stat-value red" id="riskCount">0</div>
+          <div class="stat-sub">Requiring review</div>
+        </div>
+      </div>
+
+      <!-- RISK FLAGS -->
+      <div class="section-label">⚠ Risk Flags — Transactions Requiring Review</div>
+      <div class="risk-section" id="riskSection">
+        <div class="risk-header">
+          <span class="risk-title">Flagged Transactions</span>
+          <span class="risk-count" id="riskHeaderCount">0 flags</span>
+        </div>
+        <div id="riskList"><div class="risk-empty">No risk flags detected. All transactions appear within normal parameters.</div></div>
+      </div>
+
+      <!-- CERTIFICATE LOG -->
+      <div class="section-label">Certificate Log</div>
       <div class="table-section">
         <div class="table-header">
-          <span class="table-title">Certificate Log</span>
-          <button class="clear-btn" onclick="clearLog()">Clear Log</button>
+          <span class="table-title">All Certificates</span>
+          <button class="clear-btn" onclick="clearLog()">Clear All Data</button>
         </div>
         <div id="tableContainer">
-          <div class="empty-state">No certificates generated yet. Try the engine at statutehq.com/calculator</div>
+          <div class="empty-state">No certificates generated yet.</div>
         </div>
       </div>
 
@@ -326,26 +214,22 @@
   </div>
 
   <script>
-    // Simple password — change this to something only you know
     const ADMIN_PASSWORD = 'statute2026';
 
     function login() {
       const pwd = document.getElementById('passwordInput').value;
-      const error = document.getElementById('loginError');
       if (pwd === ADMIN_PASSWORD) {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
         loadData();
       } else {
-        error.style.display = 'block';
+        document.getElementById('loginError').style.display = 'block';
         document.getElementById('passwordInput').value = '';
         document.getElementById('passwordInput').focus();
       }
     }
 
-    document.getElementById('passwordInput').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') login();
-    });
+    document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 
     function logout() {
       document.getElementById('dashboard').style.display = 'none';
@@ -353,48 +237,163 @@
       document.getElementById('passwordInput').value = '';
     }
 
-    function formatCurrency(n) {
-      return '£' + Number(n).toLocaleString('en-GB');
+    function formatCurrency(n) { return '£' + Number(n || 0).toLocaleString('en-GB'); }
+
+    function getClassBadge(c) {
+      const rb = (c.rateBand || '').toLowerCase();
+      if (rb.includes('s.59') || c.section59) return '<span class="badge badge-s59">S.59</span>';
+      if (rb.includes('mdr')) return '<span class="badge badge-mdr">MDR</span>';
+      if (rb.includes('relief') || rb.includes('charity') || rb.includes('rsl') || rb.includes('local authority') || rb.includes('group') || rb.includes('crofting')) return '<span class="badge badge-relief">Relief</span>';
+      if (rb.includes('commercial') || rb.includes('mixed') || rb.includes('lease') || rb.includes('freeport')) return '<span class="badge badge-commercial">Commercial</span>';
+      if (rb.includes('shared')) return '<span class="badge badge-commercial">Shared Own.</span>';
+      if (rb.includes('sub-sale')) return '<span class="badge badge-commercial">Sub-sale</span>';
+      return '<span class="badge badge-res">Residential</span>';
+    }
+
+    function getRiskFlags(certs) {
+      const flags = [];
+
+      certs.forEach((c, i) => {
+        // 1. High ADS — ADS > £50,000
+        if ((c.ads || 0) > 50000) {
+          flags.push({
+            ref: c.ref,
+            date: c.date,
+            type: 'high-ads',
+            icon: '⚠',
+            msg: `High ADS liability of ${formatCurrency(c.ads)} on ${formatCurrency(c.price)} purchase. Verify ADS applicability and buyer type classification.`,
+            badge: 'high-ads',
+            badgeText: 'High ADS'
+          });
+        }
+
+        // 2. Connected parties — buyer name matches firm name
+        if (c.buyerName && c.firmName) {
+          const buyer = c.buyerName.toLowerCase().split(' ').filter(w => w.length > 3);
+          const firm = c.firmName.toLowerCase().split(' ').filter(w => w.length > 3);
+          if (buyer.some(w => firm.includes(w))) {
+            flags.push({
+              ref: c.ref,
+              date: c.date,
+              type: 'connected',
+              icon: '🔗',
+              msg: `Connected parties detected — buyer "${c.buyerName}" and firm "${c.firmName}" share common words. Revenue Scotland may treat as connected under LBTT(S)A 2013 s.40. ADS grouping rules may apply.`,
+              badge: 'connected',
+              badgeText: 'Connected Parties'
+            });
+          }
+        }
+
+        // 3. Section 59 — large saving triggered
+        if (c.section59 && (c.saving || 0) > 20000) {
+          flags.push({
+            ref: c.ref,
+            date: c.date,
+            type: 's59',
+            icon: '✦',
+            msg: `Section 59 triggered on ${c.units}-unit block at ${formatCurrency(c.price)}. Tax saving of ${formatCurrency(c.saving)} vs residential rate. Verify all ${c.units} units are genuinely residential dwellings in a single transaction.`,
+            badge: 's59',
+            badgeText: 'S.59 Saving'
+          });
+        }
+
+        // 4. High value transaction — purchase price > £2m
+        if ((c.price || 0) > 2000000) {
+          flags.push({
+            ref: c.ref,
+            date: c.date,
+            type: 'high-ads',
+            icon: '£',
+            msg: `High-value transaction — ${formatCurrency(c.price)}. Verify all transaction details, linked transactions, and whether group relief or other reliefs may apply. Consider whether transaction is part of a series.`,
+            badge: 'high-ads',
+            badgeText: 'High Value'
+          });
+        }
+
+        // 5. Zero tax on residential — unusual
+        if (!c.section59 && (c.total || 0) === 0 && (c.price || 0) > 175000) {
+          const rb = (c.rateBand || '').toLowerCase();
+          const isRelief = rb.includes('relief') || rb.includes('charity') || rb.includes('rsl') || rb.includes('local authority') || rb.includes('group') || rb.includes('crofting') || rb.includes('llp incorp') || rb.includes('oeic') || rb.includes('building society') || rb.includes('planning');
+          if (!isRelief) {
+            flags.push({
+              ref: c.ref,
+              date: c.date,
+              type: 'connected',
+              icon: '?',
+              msg: `Zero total tax liability on ${formatCurrency(c.price)} transaction above the nil rate threshold. Verify calculation inputs and relief eligibility.`,
+              badge: 'connected',
+              badgeText: 'Zero Tax'
+            });
+          }
+        }
+      });
+
+      return flags;
     }
 
     function loadData() {
-      const raw = localStorage.getItem('statute_certificates');
-      const certs = raw ? JSON.parse(raw) : [];
+      const certs = JSON.parse(localStorage.getItem('statute_certificates') || '[]');
 
-      // Stats
+      // ── Stats ─────────────────────────────────────────────────
       const total = certs.length;
+      const totalTax = certs.reduce((s, c) => s + (c.total || 0), 0);
+      const totalSaved = certs.reduce((s, c) => s + (c.saving || 0), 0);
+      const avgPrice = total > 0 ? certs.reduce((s, c) => s + (c.price || 0), 0) / total : 0;
       const s59 = certs.filter(c => c.section59).length;
-      const totalSaved = certs.reduce((sum, c) => sum + (c.saving || 0), 0);
-      const avgPrice = total > 0 ?
-        certs.reduce((sum, c) => sum + c.price, 0) / total : 0;
+      const mdr = certs.filter(c => (c.rateBand || '').includes('MDR')).length;
+      const adsTriggered = certs.filter(c => (c.ads || 0) > 0).length;
+      const flags = getRiskFlags(certs);
 
       document.getElementById('totalCerts').textContent = total;
-      document.getElementById('s59Count').textContent = s59;
+      document.getElementById('totalTax').textContent = formatCurrency(totalTax);
       document.getElementById('totalSaved').textContent = formatCurrency(totalSaved);
       document.getElementById('avgTransaction').textContent = formatCurrency(Math.round(avgPrice));
+      document.getElementById('s59Count').textContent = s59;
+      document.getElementById('mdrCount').textContent = mdr;
+      document.getElementById('adsCount').textContent = adsTriggered;
+      document.getElementById('riskCount').textContent = flags.length;
 
-      // Table
+      // ── Risk Flags ────────────────────────────────────────────
+      document.getElementById('riskHeaderCount').textContent = flags.length + ' flag' + (flags.length !== 1 ? 's' : '');
+      const riskList = document.getElementById('riskList');
+      if (flags.length === 0) {
+        riskList.innerHTML = '<div class="risk-empty">No risk flags detected. All transactions appear within normal parameters.</div>';
+      } else {
+        riskList.innerHTML = flags.map(f => `
+          <div class="risk-item">
+            <div class="risk-icon">${f.icon}</div>
+            <div class="risk-body">
+              <div class="risk-ref">${f.ref || '—'} <span class="risk-badge ${f.badge}">${f.badgeText}</span></div>
+              <div class="risk-msg">${f.msg}</div>
+              <div class="risk-meta">${f.date || ''}</div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // ── Certificate Table ─────────────────────────────────────
       const container = document.getElementById('tableContainer');
       if (certs.length === 0) {
         container.innerHTML = '<div class="empty-state">No certificates generated yet. Try the engine at statutehq.com/calculator</div>';
         return;
       }
 
-      const rows = [...certs].reverse().map(c => `
-        <tr>
-          <td>${c.ref || '—'}</td>
-          <td>${c.date || '—'}</td>
-          <td>${c.units}</td>
-          <td class="amount-gold">${formatCurrency(c.price)}</td>
-          <td>${c.section59 ?
-            '<span class="badge badge-s59">S.59 Triggered</span>' :
-            '<span class="badge badge-res">Residential</span>'}</td>
-          <td class="amount-gold">${formatCurrency(c.lbtt)}</td>
-          <td class="amount-green">${formatCurrency(c.ads)}</td>
-          <td class="amount-gold">${formatCurrency(c.total)}</td>
-          <td class="amount-green">${c.saving > 0 ? formatCurrency(c.saving) + ' saved' : '—'}</td>
-        </tr>
-      `).join('');
+      const rows = [...certs].reverse().map(c => {
+        const hasFlag = flags.some(f => f.ref === c.ref);
+        return `
+          <tr>
+            <td>${c.ref || '—'}${hasFlag ? ' <span class="badge badge-warn">⚠ Flag</span>' : ''}</td>
+            <td>${c.date || '—'}</td>
+            <td>${c.units || 1}</td>
+            <td class="amount-gold">${formatCurrency(c.price)}</td>
+            <td>${getClassBadge(c)}</td>
+            <td class="amount-gold">${formatCurrency(c.lbtt)}</td>
+            <td class="${(c.ads || 0) > 0 ? 'amount-red' : 'amount-green'}">${formatCurrency(c.ads)}</td>
+            <td class="amount-gold">${formatCurrency(c.total)}</td>
+            <td class="amount-green">${(c.saving || 0) > 0 ? formatCurrency(c.saving) + ' saved' : '—'}</td>
+          </tr>
+        `;
+      }).join('');
 
       container.innerHTML = `
         <table>
@@ -417,8 +416,9 @@
     }
 
     function clearLog() {
-      if (confirm('Clear all certificate logs? This cannot be undone.')) {
+      if (confirm('Clear all certificate data? This cannot be undone.')) {
         localStorage.removeItem('statute_certificates');
+        localStorage.removeItem('statute_trial_count');
         loadData();
       }
     }
