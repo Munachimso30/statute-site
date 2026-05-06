@@ -1225,7 +1225,27 @@
     // ── PDF Certificate ────────────────────────────────────────────
 
     function downloadCertificate() {
-      // ── Trial counter check ───────────────────────────────────
+      // ── Required fields check ─────────────────────────────────
+      const buyerNameVal = document.getElementById('buyerName').value.trim();
+      const firmNameVal = document.getElementById('firmName').value.trim();
+      const solicitorNameVal = document.getElementById('solicitorName').value.trim();
+
+      if (!buyerNameVal || !firmNameVal || !solicitorNameVal) {
+        // Highlight missing fields
+        ['buyerName','firmName','solicitorName'].forEach(id => {
+          const el = document.getElementById(id);
+          if (!el.value.trim()) {
+            el.style.borderColor = '#e07070';
+            el.placeholder = 'Required for certificate';
+            el.addEventListener('input', () => { el.style.borderColor = ''; }, { once: true });
+          }
+        });
+        // Scroll to first missing field
+        const first = ['buyerName','firmName','solicitorName'].find(id => !document.getElementById(id).value.trim());
+        document.getElementById(first).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        document.getElementById(first).focus();
+        return;
+      }
       const TRIAL_LIMIT = 3;
       const used = parseInt(localStorage.getItem('statute_trial_count') || '0');
       if (used >= TRIAL_LIMIT) {
@@ -1408,20 +1428,20 @@
       doc.setFillColor(15, 30, 53);
       doc.setDrawColor(201, 168, 76);
       doc.setLineWidth(0.3);
-      doc.rect(20, 182, 170, taxH, 'FD');
+      doc.rect(20, 176, 170, taxH, 'FD');
       doc.setTextColor(201, 168, 76);
       doc.setFontSize(8);
       doc.setFont('helvetica', 'bold');
-      doc.text('TAX CALCULATION', LX, 191);
+      doc.text('TAX CALCULATION', LX, 185);
       doc.setDrawColor(201, 168, 76);
       doc.setLineWidth(0.2);
-      doc.line(LX, 193, VX, 193);
+      doc.line(LX, 187, VX, 187);
 
       if (mdrAppliedPDF && mdrW) {
         doc.setTextColor(201, 168, 76);
         doc.setFontSize(6.5);
         doc.setFont('helvetica', 'bold');
-        doc.text('MDR WORKINGS  —  LBTT(S)A 2013 Sch.5', LX, 199);
+        doc.text('MDR WORKINGS  —  LBTT(S)A 2013 Sch.5', LX, 193);
         const workRows = [
           ['Avg price per dwelling  (' + fmt(mdrW.price) + ' / ' + mdrW.units + ' units)', fmt(mdrW.avg)],
           ['LBTT on ' + fmt(mdrW.avg) + '  x  ' + mdrW.units + ' dwellings  (MDR subtotal)', fmt(mdrW.mdrRaw)],
@@ -1430,7 +1450,7 @@
         ];
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(7);
-        let wy = 206;
+        let wy = 200;
         workRows.forEach((row, i) => {
           doc.setTextColor(i === 3 ? 201 : 150, i === 3 ? 168 : 130, i === 3 ? 76 : 90);
           doc.text(row[0], LX, wy);
@@ -1474,26 +1494,26 @@
         doc.setTextColor(150, 130, 90);
         doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
-        doc.text('LBTT Liability:', LX, 202);
+        doc.text('LBTT Liability:', LX, 196);
         doc.setTextColor(201, 168, 76);
-        doc.text(lbtt, VX, 202, { align: 'right' });
+        doc.text(lbtt, VX, 196, { align: 'right' });
         doc.setTextColor(150, 130, 90);
-        doc.text('ADS Liability:', LX, 212);
+        doc.text('ADS Liability:', LX, 206);
         doc.setTextColor(92, 184, 138);
-        doc.text(ads, VX, 212, { align: 'right' });
+        doc.text(ads, VX, 206, { align: 'right' });
         doc.setDrawColor(100, 90, 60);
         doc.setLineWidth(0.2);
-        doc.line(LX, 218, VX, 218);
+        doc.line(LX, 212, VX, 212);
         doc.setTextColor(150, 130, 90);
-        doc.text('TOTAL TAX LIABILITY:', LX, 228);
+        doc.text('TOTAL TAX LIABILITY:', LX, 222);
         doc.setTextColor(201, 168, 76);
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
-        doc.text(total, VX, 228, { align: 'right' });
+        doc.text(total, VX, 222, { align: 'right' });
       }
 
       // STATUTORY AUTHORITY BOX
-      const statY = 182 + taxH + 3;
+      const statY = 176 + taxH + 3;
       const statH = mdrAppliedPDF ? 16 : 42;
       doc.setFillColor(15, 30, 53);
       doc.setDrawColor(60, 50, 20);
@@ -1535,8 +1555,15 @@
         doc.text(line, 30, statY + 14 + (i * 7));
       });
 
+      // DISCLAIMER — printed at very bottom of statutory authority box
+      const disclaimerY = statY + statH + 2;
+      doc.setTextColor(60, 55, 35);
+      doc.setFontSize(5.5);
+      doc.setFont('helvetica', 'italic');
+      doc.text('For informational purposes only. Practitioners must verify against Revenue Scotland guidance before filing. Statute accepts no liability for reliance without independent verification.', 105, disclaimerY + 3, { align: 'center', maxWidth: 164 });
+
       // AUDIT FOOTER
-      const auditY = statY + statH + 3;
+      const auditY = disclaimerY + 6;
       doc.setFillColor(10, 22, 40);
       doc.setDrawColor(40, 35, 15);
       doc.setLineWidth(0.2);
